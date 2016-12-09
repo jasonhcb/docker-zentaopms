@@ -28,7 +28,6 @@ class searchModel extends model
         $searchParams['fieldParams']  = json_encode($searchConfig['params']);
         $searchParams['actionURL']    = $searchConfig['actionURL'];
         $searchParams['style']        = zget($searchConfig, 'style', 'full');
-        $searchParams['onMenuBar']    = zget($searchConfig, 'onMenuBar', 'no');
         $searchParams['queryID']      = isset($searchConfig['queryID']) ? $searchConfig['queryID'] : 0;
 
         $this->session->set('searchParams', $searchParams);
@@ -68,54 +67,49 @@ class searchModel extends model
             /* Set and or. */
             $andOr = strtoupper($this->post->$andOrName);
             if($andOr != 'AND' and $andOr != 'OR') $andOr = 'AND';
+            $where .= " $andOr ";
+
+            /* Set filed name. */
+            $where .= '`' . $this->post->$fieldName . '` ';
 
             /* Set operator. */
             $value    = $this->post->$valueName;
             $operator = $this->post->$operatorName;
             if(!isset($this->lang->search->operators[$operator])) $operator = '=';
 
-            /* Escape char. */
-            $value = str_replace(array('\\', '%', '_'), array('\\\\', '\\%', '\\_'), $value);
-
-            /* Set condition. */
-            $condition = '';
             if($operator == "include")
             {
-                $condition = ' LIKE ' . $this->dbh->quote("%$value%");
+                $where .= ' LIKE ' . $this->dbh->quote("%$value%");
             }
             elseif($operator == "notinclude")
             {
-                $condition = ' NOT LIKE ' . $this->dbh->quote("%$value%"); 
+                $where .= ' NOT LIKE ' . $this->dbh->quote("%$value%"); 
             }
             elseif($operator == 'belong')
             {
                 if($this->post->$fieldName == 'module')
                 {
                     $allModules = $this->loadModel('tree')->getAllChildId($value);
-                    if($allModules) $condition = helper::dbIN($allModules);
+                    if($allModules) $where .= helper::dbIN($allModules);
                 }
                 elseif($this->post->$fieldName == 'dept')
                 {
                     $allDepts = $this->loadModel('dept')->getAllChildId($value);
-                    $condition = helper::dbIN($allDepts);
+                    $where .= helper::dbIN($allDepts);
                 }
                 else
                 {
-                    $condition = ' = ' . $this->dbh->quote($value) . ' ';
+                    $where .= ' = ' . $this->dbh->quote($value) . ' ';
                 }
             }
             else
             {
-                $condition = $operator . ' ' . $this->dbh->quote($value) . ' ';
+                $where .= $operator . ' ' . $this->dbh->quote($value) . ' ';
             }
-
-            /* Set filed name. */
-            if($condition) $where .= " $andOr " . '`' . $this->post->$fieldName . '` ' . $condition;
         }
 
         $where .=" ))";
         $where  = $this->replaceDynamic($where);
-
         /* Save to session. */
         $querySessionName = $this->post->module . 'Query';
         $formSessionName  = $this->post->module . 'Form';
@@ -184,7 +178,7 @@ class searchModel extends model
 
         if($hasUser)
         {
-            $users        = $this->loadModel('user')->getPairs('realname');
+            $users        = $this->loadModel('user')->getPairs();
             $users['$@me'] = $this->lang->search->me;
         }
         if($hasProduct) $products = array('' => '') + $this->loadModel('product')->getPairs();
@@ -335,7 +329,7 @@ class searchModel extends model
     }
 
     /**
-     * Get records by the condition.
+     * Get records by the conditon.
      * 
      * @param  string    $module 
      * @param  string    $moduleIdList
@@ -431,5 +425,25 @@ class searchModel extends model
             $query = str_replace("'\$today'",     "'" . $today              . "' and '" . $today            . "'", $query);
         }
         return $query;
+    }
+
+    /**
+     * Merge shortcut query in featureBar.
+     * 
+     * @param  string $module 
+     * @param  string $method 
+     * @access public
+     * @return void
+     */
+    public function mergeFeatureBar($module, $method)
+    {
+        if(!isset($this->lang->$module->featureBar[$method])) return;
+        $queryModule = $module == 'project' ? 'task' : ($module == 'product' ? 'story' : $module);
+        $shortcuts   = $this->dao->select('id, title')->from(TABLE_USERQUERY)->where('account')->eq($this->app->user->account)->andWhere('module')->eq($queryModule)->orderBy('id_asc')->fetchPairs();
+        foreach($shortcuts as $id => $name)
+        {
+            $shortcutID = 'QUERY' . $id;
+            $this->lang->$module->featureBar[$method][$shortcutID] = $name;
+        }
     }
 }

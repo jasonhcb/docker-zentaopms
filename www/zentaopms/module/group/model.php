@@ -129,6 +129,11 @@ class groupModel extends model
         return $this->dao->findById($groupID)->from(TABLE_GROUP)->fetch();
     }
 
+    public function getByIdlist($groupID)
+    {
+        return $this->dao->select('*')->from(TABLE_GROUP)->where('id')->in($groupID)->fetchAll();
+    }
+
     /**
      * Get group by account.
      * 

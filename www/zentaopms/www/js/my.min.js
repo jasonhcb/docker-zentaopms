@@ -34,7 +34,7 @@ function createLink(moduleName, methodName, vars, viewType, isOnlyBody)
     }
 
     /* if page has onlybody param then add this param in all link. the param hide header and footer. */
-    if((typeof(config.onlybody) != 'undefined' && config.onlybody == 'yes') || isOnlyBody)
+    if((typeof(onlybody) != 'undefined' && onlybody == 'yes') || isOnlyBody)
     {
         var onlybody = config.requestType != 'GET' ? "?onlybody=yes" : '&onlybody=yes';
         link = link + onlybody;
@@ -98,8 +98,7 @@ function showDropMenu(objectType, objectID, module, method, extra)
         $(document).click(function() {li.removeClass('show');});
         li.click(function(e){e.stopPropagation();});
 
-        $dropMenu.on('keydown', '#search', function(e)
-        {
+        $dropMenu.on('keydown', '#search', function(e){
             var code = e.which;
             var $this = $dropMenu.find('#searchResult > .search-list > ul > li.active');
             if(code === 38) // up
@@ -142,8 +141,7 @@ function showDropMenu(objectType, objectID, module, method, extra)
             {
                 if($this.length) window.location.href = $this.children('a').attr('href');
             }
-        }).on('change keyup paste input propertychange', '#search', function()
-        {
+        }).on('change keyup paste input propertychange', '#search', function(){
             var $search = $(this);
             var searchKey = $search.val();
             if(searchKey === $dropMenu.data('lastSearchKey')) return;
@@ -253,7 +251,7 @@ function switchDocLib(libID, module, method, extra)
     {
         if(method != 'view' && method != 'edit')
         {
-            link = createLink(module, method, 'rootID=' + libID);
+            link = createLink(module, method, "rootID=" + libID);
         }
         else
         {
@@ -262,9 +260,9 @@ function switchDocLib(libID, module, method, extra)
     }
     else if(module == 'tree')
     {
-        link = createLink(module, method, 'rootID=' + libID + '&type=' + extra);
+        link = createLink(module, method, "rootID=" + libID + '&type=' + extra);
     }
-    location.href = link;
+    location.href=link;
 }
 
 /**
@@ -332,7 +330,7 @@ function setHelpLink()
  */
 function setPlaceholder()
 {
-    if(typeof(holders) != 'undefined')
+    if(typeof(holders) != "undefined")
     {
         for(var key in holders)
         {
@@ -492,7 +490,7 @@ function setOuterBox()
     var resetOuterHeight = function()
     {
         var sideH  = side.length ? (side.outerHeight() + $('#featurebar').outerHeight() + 20) : 0;
-        var height = Math.max(sideH, $(window).height() - $('#header').outerHeight() - ($('#footer').outerHeight() || 0) - 20);
+        var height = Math.max(sideH, $(window).height() - $('#header').height() - $('#footer').height() - 33);
         if(navigator.userAgent.indexOf("MSIE 8.0") >= 0) height -= 40;
         $('#wrap .outer').css('min-height', height);
     }
@@ -683,7 +681,6 @@ function checkTable($table)
     {
         selector: 'tbody > tr',
         trigger: 'tbody',
-        ignoreVal: 10,
         start: function(e)
         {
             if($(e.target).is(':checkbox,a')) return false;
@@ -698,7 +695,6 @@ function checkTable($table)
                 }
             });
         },
-        clickBehavior: 'multi',
         select: function(e)
         {
             checkRow.call(e.target, true);
@@ -707,7 +703,7 @@ function checkTable($table)
         {
             checkRow.call(e.target, false);
         }
-    }).on('click', 'tbody > tr :checkbox', function(e){checkRow.call(this); e.stopPropagation();}).on('click mousedown mousemove mouseup', 'tbody a,tbody select,tbody input', function(e) {e.stopPropagation();});
+    }).on('click', 'tbody > tr :checkbox', function(e){checkRow.call(this); e.stopPropagation();}).on('click', 'tbody a', function(e) {e.stopPropagation();});
 
     $(document).off('change.checktable').on('change.checktable', '.rows-selector:checkbox', function()
     {
@@ -1317,6 +1313,7 @@ function setModal4List(triggerClass, replaceID, callback, width)
  */
 function setTableBehavior()
 {
+    $('#wrap .table:not(.table-data, .table-form, .active-disabled, .tablesorter)').on('click', 'tbody tr:not(.active-disabled) td', function(){$(this).closest('tr').toggleClass('active');});
     $('#wrap .outer > .table, #wrap .outer > form > .table, #wrap .outer > .mian > .table, #wrap .outer > .mian > form > .table, #wrap .outer > .container > .table').not('.table-data, .table-form, .table-custom').addClass('table table-condensed table-hover table-striped tablesorter');
 
     $(document).on('click', 'tr[data-url]', function()
@@ -1406,11 +1403,7 @@ function computePasswordStrength(password)
  */
 function checkOnlybodyPage()
 {
-    if(location.href == top.location.href)
-    {
-        href = location.href.replace('?onlybody=yes', '');
-        location.href = href.replace('&onlybody=yes', '');
-    }
+    if(location.href == top.location.href) location.href = location.href.replace('onlybody=yes', '');
 }
 
 /**
@@ -1556,7 +1549,7 @@ function initPrioritySelector()
                 set = $dropdown.data('set');
                 set = set ? set.split(',') : [0,1,2,3,4];
             }
-            set.sort(function(a,b){return a - b});
+            set.sort();
             for(var i = 0; i < set.length; ++i)
             {
                 var v = set[i];
@@ -1674,28 +1667,28 @@ function removeCookieByKey(cookieKey)
  */
 function initHotKey()
 {
-    $(document).on('keydown', 'Ctrl+g', function(e)
+    /* CTRL+g, auto focus on the search box. */
+    $(document).bind('keydown', 'Ctrl+g', function(evt)
     {
-        /* CTRL+g, auto focus on the search box. */
-        $('#searchQuery').val('').focus();
-        e.stopPropagation();
-        e.preventDefault();
+        $('#searchQuery').attr('value', '');
+        $('#searchQuery').focus();
+        evt.stopPropagation( );  
+        evt.preventDefault( );
         return false;
-    }).on('keydown', 'Alt+up', function()
+    });
+
+    /* left, go to pre object. */
+    $(document).bind('keydown', 'left', function(evt)
     {
-        /* Alt+up, go back to the previous page. */
-        var backLink = $('#back').attr("href");
-        if(backLink) location.href = backLink;
-    }).on('keydown', 'left', function()
+        preLink = ($('#pre').attr("href"));
+        if(typeof(preLink) != 'undefined') location.href = preLink;
+    });
+
+    /* right, go to next object. */
+    $(document).bind('keydown', 'right', function(evt)
     {
-        /* left, go to pre object. */
-        var preLink = $('#pre').attr("href");
-        if(preLink) location.href = preLink;
-    }).on('keydown', 'right', function()
-    {
-        /* right, go to next object. */
-        var nextLink = $('#next').attr("href");
-        if(preLink) location.href = nextLink;
+        nextLink = ($('#next').attr("href"));
+        if(typeof(nextLink) != 'undefined') location.href = nextLink;
     });
 }
 
@@ -1813,48 +1806,13 @@ function removeDitto()
     });
 }
 
-/**
- * Revert module cookie.
- * 
- * @access public
- * @return void
- */
-function revertModuleCookie()
-{
-    if($('#mainmenu .nav li[data-id="project"]').hasClass('active'))
-    {
-        $('#modulemenu .nav li[data-id="task"] a').click(function()
-        {
-            $.cookie('moduleBrowseParam', 0, {expires:config.cookieLife, path:config.webRoot});
-        });
-    }
-    if($('#mainmenu .nav li[data-id="product"]').hasClass('active'))
-    {
-        $('#modulemenu .nav li[data-id="story"] a').click(function()
-        {
-            $.cookie('storyModule', 0, {expires:config.cookieLife, path:config.webRoot});
-        });
-    }
-    if($('#mainmenu .nav li[data-id="qa"]').hasClass('active'))
-    {
-        $('#modulemenu .nav li[data-id="bug"] a').click(function()
-        {
-            $.cookie('bugModule', 0, {expires:config.cookieLife, path:config.webRoot});
-        });
-        $('#modulemenu .nav li[data-id="testcase"] a').click(function()
-        {
-            $.cookie('caseModule', 0, {expires:config.cookieLife, path:config.webRoot});
-        });
-    }
-}
-
 /* Ping the server every some minutes to keep the session. */
 needPing = true;
 
 /* When body's ready, execute these. */
 $(document).ready(function() 
 {
-    if(typeof(config.onlybody) != 'undefined' && config.onlybody == 'yes') checkOnlybodyPage();
+    if(typeof(onlybody) != 'undefined' && onlybody == 'yes') checkOnlybodyPage();
     $('body').addClass('m-{currentModule}-{currentMethod}'.format(config));
 
     setModal();
@@ -1900,5 +1858,4 @@ $(document).ready(function()
     initHotKey();
     initHelpLink();
     checkTutorial();
-    revertModuleCookie();
 });

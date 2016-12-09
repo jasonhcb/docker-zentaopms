@@ -40,7 +40,6 @@ $lang->report->workload         = '员工负载表';
 $lang->report->workloadAB       = '工作负载';
 $lang->report->bugOpenedDate    = 'Bug创建时间';
 $lang->report->taskAssignedDate = '起止时间';
-$lang->report->beginAndEnd      = '起止时间';
 $lang->report->dept             = '部门';
 
 $lang->reportList->project->lists[10] = $lang->projectCommon . '偏差报表|report|projectdeviation';
@@ -88,4 +87,3 @@ $lang->report->mailTitle->task     = " 任务(%s),";
 $lang->report->mailTitle->todo     = " 待办(%s),";
 $lang->report->mailTitle->testTask = " 测试版本(%s),";
 
-$lang->report->proVersion = '<a href="http://api.zentao.net/goto.php?item=proversion&from=reportpage" target="_blank">更多精彩，尽在专业版！</a>';

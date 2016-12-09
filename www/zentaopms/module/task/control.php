@@ -1003,6 +1003,13 @@ class task extends control
         $users       = $this->loadModel('user')->getPairs('noletter');
         $toList      = $task->assignedTo;
         $ccList      = trim($task->mailto, ',');
+	
+        $hdcTask = $this->loadModel('hdc')->isHdcTask($task->id, $task->story);
+        if ($hdcTask) {
+            $toList = is_object($hdcTask) ? $hdcTask->assignedTo : '';
+            $hdcMailto = $this->loadModel('hdc')->getMailto($task->project);
+            $ccList = trim($ccList . $hdcMailto, ',');
+        }
 
         if($toList == '')
         {
@@ -1151,18 +1158,9 @@ class task extends control
             }
 
             /* Get tasks. */
-            $tasks = array();
-            if($this->session->taskOnlyCondition)
-            {
-                $tasks = $this->dao->select('*')->from(TABLE_TASK)->alias('t1')->where($this->session->taskQueryCondition)
-                    ->beginIF($this->post->exportType == 'selected')->andWhere('t1.id')->in($this->cookie->checkedItem)->fi()
-                    ->orderBy($orderBy)->fetchAll('id');
-            }
-            else
-            {
-                $stmt = $this->dbh->query($this->session->taskQueryCondition . ($this->post->exportType == 'selected' ? " AND t1.id IN({$this->cookie->checkedItem})" : '') . " ORDER BY " . strtr($orderBy, '_', ' '));
-                while($row = $stmt->fetch()) $tasks[$row->id] = $row;
-            }
+            $tasks = $this->dao->select('*')->from(TABLE_TASK)->alias('t1')->where($this->session->taskQueryCondition)
+                ->beginIF($this->post->exportType == 'selected')->andWhere('t1.id')->in($this->cookie->checkedItem)->fi()
+                ->orderBy($orderBy)->fetchAll('id');
 
             /* Get users and projects. */
             $users    = $this->loadModel('user')->getPairs('noletter');

@@ -62,9 +62,9 @@ class userModel extends model
     }
 
     /**
-     * Get the account=>realname pairs.
+     * Get the account=>relaname pairs.
      * 
-     * @param  string $params   noletter|noempty|noclosed|nodeleted|withguest|pofirst|devfirst|qafirst|pmfirst|realname, can be sets of theme
+     * @param  string $params   noletter|noempty|noclosed|nodeleted|withguest|pofirst|devfirst|qafirst|pmfirst, can be sets of theme
      * @param  string $usersToAppended  account1,account2 
      * @access public
      * @return array
@@ -98,7 +98,7 @@ class userModel extends model
         {
             $firstLetter = ucfirst(substr($account, 0, 1)) . ':';
             if(strpos($params, 'noletter') !== false) $firstLetter =  '';
-            $users[$account] =  $firstLetter . (($user->deleted and strpos($params, 'realname') === false) ? $account : ($user->realname ? $user->realname : $account));
+            $users[$account] =  $firstLetter . ($user->deleted ? $account : ($user->realname ? $user->realname : $account));
         }
 
         /* Append empty, closed, and guest users. */
@@ -297,19 +297,6 @@ class userModel extends model
                 $data[$i]->address  = $users->address[$i];
                 $data[$i]->zipcode  = $users->zipcode[$i];
 
-                /* Change for append field, such as feedback.*/
-                if(!empty($this->config->user->batchAppendFields))
-                {
-                    $appendFields = explode(',', $this->config->user->batchAppendFields);
-                    foreach($appendFields as $appendField)
-                    {
-                        if(empty($appendField)) continue;
-                        if(!isset($users->$appendField)) continue;
-                        $fieldList = $users->$appendField;
-                        $data[$i]->$appendField = $fieldList[$i];
-                    }
-                }
-
                 $accounts[$i]     = $data[$i]->account;
                 $prev['dept']     = $data[$i]->dept;
                 $prev['role']     = $data[$i]->role;
@@ -362,7 +349,7 @@ class userModel extends model
             ->remove('password1, password2, groups,verifyPassword')
             ->get();
 
-        if(isset($this->config->safe->mode) and isset($user->password) and $this->computePasswordStrength($this->post->password1) < $this->config->safe->mode)
+        if(isset($this->config->safe->mode) and $user->password and $this->computePasswordStrength($this->post->password1) < $this->config->safe->mode)
         {
             dao::$errors['password1'][] = $this->lang->user->weakPassword;
             return false;
@@ -395,7 +382,7 @@ class userModel extends model
             }
         }
 
-        if(isset($_POST['groups']))
+        if($this->post->groups)
         {
             $this->dao->delete()->from(TABLE_USERGROUP)->where('account')->eq($oldUser->account)->exec();
             foreach($this->post->groups as $groupID)
@@ -427,31 +414,30 @@ class userModel extends model
      */
     public function batchEdit()
     {
-        $data = fixer::input('post')->get();
         if(empty($_POST['verifyPassword']) or md5($this->post->verifyPassword) != $this->app->user->password) die(js::alert($this->lang->user->error->verifyPassword));
 
-        $oldUsers     = $this->dao->select('id, account, email')->from(TABLE_USER)->where('id')->in(array_keys($data->account))->fetchAll('id');
-        $accountGroup = $this->dao->select('id, account')->from(TABLE_USER)->where('account')->in($data->account)->fetchGroup('account', 'id');
+        $oldUsers     = $this->dao->select('id, account, email')->from(TABLE_USER)->where('id')->in(array_keys($this->post->account))->fetchAll('id');
+        $accountGroup = $this->dao->select('id, account')->from(TABLE_USER)->where('account')->in($this->post->account)->fetchGroup('account', 'id');
 
         $accounts = array();
-        foreach($data->account as $id => $account)
+        foreach($this->post->account as $id => $account)
         {
             $users[$id]['account']  = $account;
-            $users[$id]['realname'] = $data->realname[$id];
-            $users[$id]['commiter'] = $data->commiter[$id];
-            $users[$id]['email']    = $data->email[$id];
-            $users[$id]['join']     = $data->join[$id];
-            $users[$id]['skype']    = $data->skype[$id];
-            $users[$id]['qq']       = $data->qq[$id];
-            $users[$id]['yahoo']    = $data->yahoo[$id];
-            $users[$id]['gtalk']    = $data->gtalk[$id];
-            $users[$id]['wangwang'] = $data->wangwang[$id];
-            $users[$id]['mobile']   = $data->mobile[$id];
-            $users[$id]['phone']    = $data->phone[$id];
-            $users[$id]['address']  = $data->address[$id];
-            $users[$id]['zipcode']  = $data->zipcode[$id];
-            $users[$id]['dept']     = $data->dept[$id] == 'ditto' ? (isset($prev['dept']) ? $prev['dept'] : 0) : $data->dept[$id];
-            $users[$id]['role']     = $data->role[$id] == 'ditto' ? (isset($prev['role']) ? $prev['role'] : 0) : $data->role[$id];
+            $users[$id]['realname'] = $this->post->realname[$id];
+            $users[$id]['commiter'] = $this->post->commiter[$id];
+            $users[$id]['email']    = $this->post->email[$id];
+            $users[$id]['join']     = $this->post->join[$id];
+            $users[$id]['skype']    = $this->post->skype[$id];
+            $users[$id]['qq']       = $this->post->qq[$id];
+            $users[$id]['yahoo']    = $this->post->yahoo[$id];
+            $users[$id]['gtalk']    = $this->post->gtalk[$id];
+            $users[$id]['wangwang'] = $this->post->wangwang[$id];
+            $users[$id]['mobile']   = $this->post->mobile[$id];
+            $users[$id]['phone']    = $this->post->phone[$id];
+            $users[$id]['address']  = $this->post->address[$id];
+            $users[$id]['zipcode']  = $this->post->zipcode[$id];
+            $users[$id]['dept']     = $this->post->dept[$id] == 'ditto' ? (isset($prev['dept']) ? $prev['dept'] : 0) : $this->post->dept[$id];
+            $users[$id]['role']     = $this->post->role[$id] == 'ditto' ? (isset($prev['role']) ? $prev['role'] : 0) : $this->post->role[$id];
 
             if(isset($accountGroup[$account]) and count($accountGroup[$account]) > 1) die(js::error(sprintf($this->lang->user->error->accountDupl, $id)));
             if(in_array($account, $accounts)) die(js::error(sprintf($this->lang->user->error->accountDupl, $id)));
@@ -702,13 +688,14 @@ class userModel extends model
                     break;
                 }
                 $acl = json_decode($group->acl, true);
-                if(empty($acl['products'])) $productAllow = true;
-                if(empty($acl['projects'])) $projectAllow = true;
                 if(empty($acls) and !empty($acl))
                 {
                     $acls = $acl;
                     continue;
                 }
+
+                if(empty($acl['products'])) $productAllow = true;
+                if(empty($acl['projects'])) $projectAllow = true;
 
                 if(!empty($acl['views'])) $acls['views'] = array_merge($acls['views'], $acl['views']);
                 if(!empty($acl['products'])) $acls['products'] = !empty($acls['products']) ? array_merge($acls['products'], $acl['products']) : $acl['products'];
@@ -968,10 +955,18 @@ class userModel extends model
      */
     public function getDataInJSON($user)
     {
-        unset($user->password);
-        unset($user->deleted);
-        $user->company = $this->app->company->name;
-        return array('user' => $user);
+        $data                   = array();
+        $data['user']           = new stdclass();
+        $data['user']->id       = $user->id;
+        $data['user']->account  = $user->account;
+        $data['user']->email    = $user->email;
+        $data['user']->realname = $user->realname;
+        $data['user']->gender   = $user->gender;
+        $data['user']->dept     = $user->dept;
+        $data['user']->role     = $user->role;
+        $data['user']->company  = $this->app->company->name;
+
+        return $data;
     }
 
     /**

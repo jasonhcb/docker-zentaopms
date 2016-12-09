@@ -10,25 +10,25 @@
  * @link        http://www.zentao.net
  */
 $lang->company->common   = 'Company';
-$lang->company->index    = "Homepage";
+$lang->company->index    = "Index";
 $lang->company->edit     = "Edit";
 $lang->company->view     = "Info";
-$lang->company->browse   = "User List";
+$lang->company->browse   = "User";
 $lang->company->dynamic  = "Dynamic";
-$lang->company->orgView  = 'View';
+$lang->company->orgView  = 'Company';
 
-$lang->company->name     = 'Company Name';
+$lang->company->name     = 'Name';
 $lang->company->phone    = 'Phone';
 $lang->company->fax      = 'Fax';
-$lang->company->address  = 'Mailing Address';
-$lang->company->zipcode  = 'Zip Code';
-$lang->company->website  = 'Official Website';
+$lang->company->address  = 'Address';
+$lang->company->zipcode  = 'Zipcode';
+$lang->company->website  = 'Website';
 $lang->company->backyard = 'Intranet';
-$lang->company->guest    = 'Guest Login';
+$lang->company->guest    = 'Guest';
 
 $lang->company->product = $lang->productCommon;
 $lang->company->project = $lang->projectCommon;
 $lang->company->user    = 'User';
 
-$lang->company->guestList[0] = 'On';
-$lang->company->guestList[1] = 'Off';
+$lang->company->guestList[0] = 'Deny';
+$lang->company->guestList[1] = 'Allow';

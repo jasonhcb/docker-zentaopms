@@ -44,8 +44,8 @@ include '../../common/view/chosen.html.php';
 #searchlite {line-height: 127px}
 #searchform.showmore #searchmore, #searchform #searchlite {display: none;}
 #searchform.showmore #searchlite, #searchform #searchmore {display: inline-block;}
-#searchform .chosen-container .chosen-drop{min-width: 400px;}
-#searchform .chosen-container .chosen-drop ul.chosen-results li{white-space:normal}
+#searchform .chosen-container .chosen-drop{min-width: 300px;}
+#searchform .chosen-container .chosen-drop ul.chosen-results li{white-space:nowrap}
 #searchmore > i, #searchlite > i {font-size: 28px;}
 #searchmore > i {position: relative; top: 4px;}
 #searchmore:hover, #searchlite:hover {color: #145CCD; background: #e5e5e5}
@@ -400,7 +400,7 @@ foreach($fieldParams as $fieldName => $param)
       if($style != 'simple')
       {
           echo html::commonButton($lang->search->reset, 'onclick=resetForm(this)');
-          if(common::hasPriv('search', 'saveQuery')) echo html::a($this->createLink('search', 'saveQuery', "module=$module&onMenuBar=$onMenuBar"), $lang->save, '', "class='saveQuery btn'");
+          if(common::hasPriv('search', 'saveQuery')) echo html::a($this->createLink('search', 'saveQuery', "module=$module"), $lang->save, '', "class='saveQuery btn'");
       }
       echo '</div>';
       ?>

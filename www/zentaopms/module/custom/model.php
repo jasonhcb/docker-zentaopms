@@ -167,9 +167,8 @@ class customModel extends model
             {
                 foreach($customMenu as $customMenuItem)
                 {
-                    if(!isset($customMenuItem->order)) $customMenuItem->order = $order;
+                    if(!isset($customMenuItem->order)) $customMenuItem->order = $order++;
                     $customMenuMap[$customMenuItem->name] = $customMenuItem;
-                    $order++;
                 }
             }
         }
@@ -190,26 +189,15 @@ class customModel extends model
             }
         }
 
-        /* Merge fileMenu and customMenu. */
-        foreach($customMenuMap as $name => $item)
-        {
-            if(!isset($allMenu->$name))$allMenu->$name = $item;
-        }
-
         foreach($allMenu as $name => $item)
         {
-            if(is_object($item)) $item = (array)$item;
-
             $label  = '';
             $module = '';
             $method = '';
             $float  = '';
             $fixed  = '';
 
-            $link = (is_array($item) and isset($item['link'])) ? $item['link'] : $item;
-            /* The variable of item has not link and is not link then ignore it. */
-            if(!is_string($link)) continue;
-
+            $link    = is_array($item) ? $item['link'] : $item;
             $label   = $link;
             $hasPriv = true;
             if(strpos($link, '|') !== false)
@@ -231,6 +219,7 @@ class customModel extends model
                         if(isset($item['subModule'])) $itemLink['subModule'] = $item['subModule'];
                         if(isset($item['alias']))     $itemLink['alias']     = $item['alias'];
                         if(isset($item['target']))    $itemLink['target']    = $item['target'];
+
                     }
                 }
 
@@ -253,11 +242,11 @@ class customModel extends model
                 if($hidden) $menuItem->hidden  = $hidden;
                 if($isTutorialMode) $menuItem->tutorial = true;
 
-                while(isset($menu[$menuItem->order])) $menuItem->order++;
                 $menu[$menuItem->order] = $menuItem;
             }
         }
 
+        while(isset($menu[$menuItem->order])) $menuItem->order++;
         ksort($menu, SORT_NUMERIC);
         return array_values($menu);
     }
@@ -311,7 +300,6 @@ class customModel extends model
     {
         global $app, $lang, $config;
         $app->loadLang($module);
-        customModel::mergeFeatureBar($module, $method);
 
         $configKey  = 'feature_' . $module . '_' . $method;
         $allMenu    = isset($lang->$module->featureBar[$method]) ? $lang->$module->featureBar[$method] : null;
@@ -319,27 +307,6 @@ class customModel extends model
         if(!commonModel::isTutorialMode() && isset($config->customMenu->$configKey)) $customMenu = $config->customMenu->$configKey;
         if(!empty($customMenu) && is_string($customMenu)) $customMenu = json_decode($customMenu);
         return $allMenu ? self::setMenuByConfig($allMenu, $customMenu) : null;
-    }
-
-    /**
-     * Merge shortcut query in featureBar.
-     * 
-     * @param  string $module 
-     * @param  string $method 
-     * @access public
-     * @return void
-     */
-    public static function mergeFeatureBar($module, $method)
-    {
-        global $lang, $app, $dbh;
-        if(!isset($lang->$module->featureBar[$method])) return;
-        $queryModule = $module == 'project' ? 'task' : ($module == 'product' ? 'story' : $module);
-        $shortcuts   = $dbh->query('select id, title from ' . TABLE_USERQUERY . " where `account` = '{$app->user->account}' AND `module` = '{$queryModule}' order by id")->fetchAll();
-        foreach($shortcuts as $shortcut)
-        {
-            $shortcutID = 'QUERY' . $shortcut->id;
-            $lang->$module->featureBar[$method][$shortcutID] = $shortcut->title;
-        }
     }
 
     /**

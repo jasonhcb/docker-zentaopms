@@ -1,0 +1,35 @@
+a:4:{s:4:"date";s:19:"2016-06-30 10:47:35";s:5:"actor";s:4:"4422";s:5:"title";s:19:"RDC 2.1版本发布";s:7:"content";s:2790:"<h3><span class="s1">功能说明</span></h3>
+<p><span class="s1"><br /></span></p>
+<p class="p2"><span class="s1"></span></p>
+<p class="p3"><span class="s2"><b>1.任务列表通过需求分组查看时，需求编号由大往下排列</b></span></p>
+<p class="p3"><span class="s2"><b><img src="data/upload/1/201606/3010441508188and.png" alt="" /><br /></b></span></p>
+<p class="p2"><span class="s1"></span></p>
+<p class="p2"><span class="s1"></span></p>
+<p class="p2"><span class="s1"></span></p>
+<p class="p3"><span class="s2"><b><br /></b></span></p>
+<p class="p3"><span class="s2"><b>2.支持远程开发中心开发项导入、编辑、保存</b></span></p>
+<p class="p3"><span class="s2"><b><img src="data/upload/1/201606/3010450103987and.png" alt="" /><br /></b></span></p>
+<p class="p3"><span class="s2"><b><br /></b></span></p>
+<p class="p2"><span class="s1"></span></p>
+<p class="p2"><span class="s1"></span></p>
+<p class="p3"><span class="s2"><b>3.支持在线查看平台操作手册</b></span></p>
+<p class="p3"><span class="s2"><b><img src="data/upload/1/201606/3010452207263as0.png" alt="" /><br /></b></span></p>
+<p class="p3"><span class="s2"><b><img src="data/upload/1/201606/3010453605218Reb.png" alt="" /></b></span></p>
+<p class="p3"><span class="s2"><b><img src="data/upload/1/201606/30104608097651ha.png" alt="" /><br /></b></span></p>
+<p class="p3"><span style="color:inherit;font-size:20px;font-weight:700;line-height:1.1;"><br /></span></p>
+<h3><span style="color:inherit;font-size:20px;font-weight:700;line-height:1.1;">修复记录</span></h3>
+<p class="p3"><span style="color:inherit;font-size:20px;font-weight:700;line-height:1.1;"><br /></span></p>
+<p class="p2"><span class="s1"></span></p>
+<p class="p3"><span class="s2"><b>1.文档管理，允许上传文件名相同的文档</b></span></p>
+<p class="p3"><span class="s2"><b><br /></b></span></p>
+<p class="p3"><span class="s2"><b>2.文档管理无法上传PPT格式附件</b></span></p>
+<p class="p3"><span class="s2"><b><br /></b></span></p>
+<p class="p3"><span class="s2"><b>3.列表导出CSV格式，显示乱码</b></span></p>
+<p class="p3"><span class="s2"><b><br /></b></span></p>
+<p class="p3"><span class="s2"><b>4.外部客户申请账号时，重复id的时候保存跳转后显示空白</b></span></p>
+<p class="p3"><span class="s2"><b><br /></b></span></p>
+<p class="p3"><span class="s2"><b>5.hdc上传报错，如果多个地方数据有误，修改一处提示保存成功</b></span></p>
+<p class="p3"><span class="s2"><b><br /></b></span></p>
+<p class="p3"><span class="s2"><b>6.我的地盘首页界面全员显示平台全部数据</b></span></p>
+<p class="p3"><span class="s2"><b><br /></b></span></p>
+<p class="p4"><span class="s1"><b>7.登录时间与实际时间不符</b></span></p>";}

@@ -21,13 +21,12 @@
   <div id='querybox' class='show'></div>
 </div>
 <form method='post' class='form-condensed' id='linkStoryForm'>
-  <table class='table tablesorter table-fixed' id='linkStoryList'> 
+  <table class='table tablesorter table-fixed'> 
     <thead>
     <tr>
       <th class='w-id'><?php echo $lang->idAB;?></th>
       <th class='w-pri'><?php echo $lang->priAB;?></th>
       <th><?php echo $lang->story->product;?></th>
-      <th><?php echo $lang->story->module;?></th>
       <th><?php echo $lang->story->title;?></th>
       <th><?php echo $lang->story->plan;?></th>
       <?php if($productType != 'normal'):?>
@@ -45,12 +44,11 @@
     <tr class='text-center'>
       <td class='text-left'>
         <input type='checkbox' name='stories[]'  value='<?php echo $story->id;?>'/> 
-        <?php echo html::hidden("products[$story->id]", $story->product);?>
+        <input type='hidden'   name='products[]' value='<?php echo $story->product;?>' />
         <?php echo html::a($storyLink, sprintf('%03d', $story->id));?>
       </td>
       <td><span class='<?php echo 'pri' . zget($lang->story->priList, $story->pri, $story->pri)?>'><?php echo zget($lang->story->priList, $story->pri, $story->pri);?></span></td>
-      <td class='text-left'><?php echo html::a($this->createLink('product', 'browse', "productID=$story->product&branch=$story->branch"), $products[$story->product]->name, '_blank');?></td>
-      <td class='text-left'><?php echo zget($modules, $story->module, '')?></td>
+      <td><?php echo html::a($this->createLink('product', 'browse', "productID=$story->product&branch=$story->branch"), $products[$story->product]->name, '_blank');?></td>
       <td class='text-left nobr' title="<?php echo $story->title?>"><?php echo html::a($storyLink, $story->title);?></td>
       <td><?php echo $story->planTitle;?></td>
       <?php if($productType != 'normal'):?>
@@ -82,7 +80,6 @@
 $(function()
 {
     ajaxGetSearchForm()
-    setTimeout(function(){fixedTheadOfList('#linkStoryList')}, 500);
     setTimeout(function(){fixedTfootAction('#linkStoryForm')}, 500);
 });
 </script>

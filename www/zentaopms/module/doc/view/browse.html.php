@@ -12,44 +12,17 @@
 ?>
 <?php include '../../common/view/header.html.php';?>
 <?php include '../../common/view/datepicker.html.php';?>
+<?php js::set('confirmDelete', $lang->doc->confirmDelete)?>
 <script language='Javascript'>
 var browseType = '<?php echo $browseType;?>';
 </script>
-<?php js::set('confirmDelete', $lang->doc->confirmDelete)?>
-<?php js::set('fixedMenu', $fixedMenu);?>
-<?php js::set('libID', $libID);?>
-<?php if(!$fixedMenu and $this->from != 'doc') js::set('type', 'doc');?>
-<?php if($this->cookie->browseType == 'bymenu'):?>
-<?php include __DIR__ . '/browsebymenu.html.php';?>
-<?php elseif($this->cookie->browseType == 'bytree'):?>
-<?php include __DIR__ . '/browsebytree.html.php';?>
-<?php else:?>
 <div id='featurebar'>
   <ul class='nav'>
-    <li id='allTab'><?php echo html::a(inlink('browse', "libID=$libID&browseType=all&param=0&orderBy=$orderBy&from=$from"), $lang->doc->allDoc)?></li>
-    <li id='openedbymeTab'><?php echo html::a(inlink('browse', "libID=$libID&browseType=openedByMe&param=0&orderBy=$orderBy&from=$from"), $lang->doc->openedByMe)?></li>
+    <li id='bymoduleTab' onclick='browseByModule()'><a href='#'><?php echo $lang->doc->moduleDoc;?></a></li>
     <li id='bysearchTab'><a href='#'><i class='icon-search icon'></i>&nbsp;<?php echo $lang->doc->searchDoc;?></a></li>
   </ul>
   <div class='actions'>
-    <div class="btn-group">
-      <button type="button" class="btn dropdown-toggle" data-toggle="dropdown"><i class='icon icon-list'></i> <?php echo $lang->doc->browseTypeList['list']?> <span class="caret"></span></button>
-      <ul class="dropdown-menu" role="menu">
-        <li><?php echo html::a('javascript:setBrowseType("bylist")', "<i class='icon icon-list'></i> {$lang->doc->browseTypeList['list']}");?></li>
-        <li><?php echo html::a('javascript:setBrowseType("bymenu")', "<i class='icon icon-th'></i> {$lang->doc->browseTypeList['menu']}");?></li>
-        <li><?php echo html::a('javascript:setBrowseType("bytree")', "<i class='icon icon-branch'></i> {$lang->doc->browseTypeList['tree']}");?></li>
-      </ul>
-    </div>
-    <div class="btn-group">
-      <button type="button" class="btn dropdown-toggle" data-toggle="dropdown"><i class='icon icon-cog'></i> <?php echo $lang->actions?> <span class="caret"></span></button>
-      <ul class="dropdown-menu" role="menu">
-        <?php
-        if(common::hasPriv('doc', 'editLib')) echo '<li>' . html::a(inlink('editLib', "rootID=$libID"), $lang->doc->editLib, '', "data-toggle='modal' data-type='iframe' data-width='800px'") . '</li>';
-        if(common::hasPriv('doc', 'deleteLib')) echo '<li>' . html::a(inlink('deleteLib', "rootID=$libID"), $lang->doc->deleteLib, 'hiddenwin') . '</li>';
-        ?>
-        <li><?php echo html::a(inlink('ajaxFixedMenu', "libID=$libID&type=" . ($fixedMenu ? 'remove' : 'fixed')), $fixedMenu ? $lang->doc->removeMenu : $lang->doc->fixedMenu, "hiddenwin");?></li>
-      </ul>
-    </div>
-    <?php common::printIcon('doc', 'create', "libID=$libID&moduleID=$moduleID");?>
+    <?php common::printIcon('doc', 'create', "libID=$libID&moduleID=$moduleID&productID=$productID&projectID=$projectID&from=doc");?>
   </div>
   <div id='querybox' class='<?php if($browseType == 'bysearch') echo 'show';?>'></div>
 </div>
@@ -60,7 +33,9 @@ var browseType = '<?php echo $browseType;?>';
       <div class='panel-heading nobr'><?php echo html::icon('folder-close-alt');?> <strong><?php echo $libName;?></strong></div>
       <div class='panel-body'>
         <?php echo $moduleTree;?>
-        <div class='text-right'><?php common::printLink('tree', 'browse', "rootID=$libID&view=doc", $lang->doc->manageType);?></div>
+        <div class='text-right'>
+          <?php common::printLink('tree', 'browse', "rootID=$libID&view=doc", $lang->doc->manageType);?>
+        </div>
       </div>
     </div>
   </div>
@@ -69,12 +44,12 @@ var browseType = '<?php echo $browseType;?>';
   <table class='table table-condensed table-hover table-striped tablesorter table-fixed' id='docList'>
     <thead>
       <tr>
-        <?php $vars = "libID=$libID&browseType=$browseType&param=$param&orderBy=%s&from=$from&recTotal={$pager->recTotal}&recPerPage={$pager->recPerPage}";?>
+        <?php $vars = "libID=$libID&module=$moduleID&productID=$productID&projectID=$projectID&browseType=$browseType&param=$param&orderBy=%s&recTotal={$pager->recTotal}&recPerPage={$pager->recPerPage}";?>
         <th class='w-id'>   <?php common::printOrderLink('id',        $orderBy, $vars, $lang->idAB);?></th>
         <th>                <?php common::printOrderLink('title',     $orderBy, $vars, $lang->doc->title);?></th>
+        <th class='w-100px'><?php common::printOrderLink('type',      $orderBy, $vars, $lang->doc->type);?></th>
         <th class='w-100px'><?php common::printOrderLink('addedBy',   $orderBy, $vars, $lang->doc->addedBy);?></th>
         <th class='w-120px'><?php common::printOrderLink('addedDate', $orderBy, $vars, $lang->doc->addedDate);?></th>
-        <th class='w-120px'><?php common::printOrderLink('editedDate', $orderBy, $vars, $lang->doc->editedDate);?></th>
         <th class='w-100px {sorter:false}'><?php echo $lang->actions;?></th>
       </tr>
     </thead>
@@ -87,9 +62,9 @@ var browseType = '<?php echo $browseType;?>';
       <tr class='text-center'>
         <td><?php if($canView) echo html::a($viewLink, sprintf('%03d', $doc->id)); else printf('%03d', $doc->id);?></td>
         <td class='text-left' title="<?php echo $doc->title?>"><nobr><?php echo html::a($viewLink, $doc->title);?></nobr></td>
+        <td><?php echo $lang->doc->types[$doc->type];?></td>
         <td><?php isset($users[$doc->addedBy]) ? print($users[$doc->addedBy]) : print($doc->addedBy);?></td>
-        <td><?php echo substr($doc->addedDate, 5, 11);?></td>
-        <td><?php echo substr($doc->editedDate, 5, 11);?></td>
+        <td><?php echo date("m-d H:i", strtotime($doc->addedDate));?></td>
         <td>
           <?php 
           common::printIcon('doc', 'edit', "doc={$doc->id}", '', 'list');
@@ -106,5 +81,4 @@ var browseType = '<?php echo $browseType;?>';
     <tfoot><tr><td colspan='6'><?php $pager->show();?></td></tr></tfoot>
   </table>
 </div>
-<?php endif;?>
 <?php include '../../common/view/footer.html.php';?>

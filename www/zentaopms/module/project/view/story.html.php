@@ -26,7 +26,7 @@
     if(commonModel::isTutorialMode())
     {
         $wizardParams = helper::safe64Encode("project=$project->id");
-        echo html::a($this->createLink('tutorial', 'wizard', "module=project&method=linkStory&params=$wizardParams"), "<i class='icon-link'></i> {$lang->project->linkStory}",'', "class='btn link-story-btn'");
+        common::printIcon('tutorial', 'wizard', "module=project&method=linkStory&params=$wizardParams", '', 'button', 'link', '', 'link-story-btn', false, '', $lang->project->linkStory);
     }
     else
     {
@@ -108,7 +108,7 @@
             if(commonModel::isTutorialMode())
             {
                 $wizardParams = helper::safe64Encode($param);
-                echo html::a($this->createLink('tutorial', 'wizard', "module=task&method=create&params=$wizardParams"), "<i class='icon-list-ul'></i>",'', "class='btn-icon btn-task-create' title='{$lang->project->wbs}'");
+                common::printIcon('tutorial', 'wizard', "module=task&method=create&params=$wizardParams", '', 'list', 'list-ul', '', 'btn-task-create', false, '', $lang->project->wbs);
             }
             else
             {

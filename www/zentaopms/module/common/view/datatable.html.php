@@ -50,7 +50,6 @@ $(document).ready(function()
         scrollPos     : 'out',
         tableClass    : 'tablesorter',
         storage       : false,
-        selectable    : {clickBehavior: 'multi'},
         ready: function()
         {
             if(!this.$table) return;
@@ -90,10 +89,7 @@ $(document).ready(function()
     };
     setTimeout(function(){fixScroll()}, 500);
 });
-</script>
-<?php endif;?>
 
-<script>
 /**
  * Fix scroll bar.
  * 
@@ -127,3 +123,4 @@ function fixScroll()
     });
 }
 </script>
+<?php endif;?>

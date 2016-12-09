@@ -118,7 +118,6 @@ class story extends control
 
         /* Init vars. */
         $source     = '';
-        $sourceNote = '';
         $pri        = 0;
         $estimate   = '';
         $title      = '';
@@ -178,7 +177,6 @@ class story extends control
         $this->view->plans            = $this->loadModel('productplan')->getPairs($productID, $branch, 'unexpired');
         $this->view->planID           = $planID;
         $this->view->source           = $source;
-        $this->view->sourceNote       = $sourceNote;
         $this->view->pri              = $pri;
         $this->view->branch           = $branch;
         $this->view->branches         = $product->type != 'normal' ? $this->loadModel('branch')->getPairs($productID) : array();
@@ -936,6 +934,7 @@ class story extends control
         $this->lang->story->menuOrder = $this->lang->testcase->menuOrder;
         $this->lang->story->menu->testcase['subModule'] = 'story';
         $this->loadModel('testcase')->setMenu($products, $productID);
+        $this->loadModel('search')->mergeFeatureBar('testcase', 'browse');
 
         /* Append id for secend sort. */
         $sort = $this->loadModel('common')->appendOrder($orderBy);
@@ -1057,15 +1056,8 @@ class story extends control
             $moduleID = $this->tree->getAllChildID($moduleID);
         }
         $stories   = $this->story->getProjectStoryPairs($projectID, $productID, $branch, $moduleID, $type);
-        if($this->app->getViewType() === 'json')
-        {
-            die(json_encode($stories));
-        }
-        else
-        {
-            $storyName = $number === '' ? 'story' : "story[$number]";
-            die(html::select($storyName, empty($stories) ? array('' => '') : $stories, $storyID, 'class=form-control onchange=setStoryRelated(' . $number . ');'));
-        }
+        $storyName = $number === '' ? 'story' : "story[$number]";
+        die(html::select($storyName, empty($stories) ? array('' => '') : $stories, $storyID, 'class=form-control onchange=setStoryRelated(' . $number . ');'));
     }
 
     /**

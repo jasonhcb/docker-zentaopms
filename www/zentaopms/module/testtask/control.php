@@ -269,6 +269,7 @@ class testtask extends control
         unset($this->config->testcase->search['fields']['branch']);
         unset($this->config->testcase->search['params']['branch']);
         $this->loadModel('search')->setSearchParams($this->config->testcase->search);
+        $this->search->mergeFeatureBar('testtask', 'cases');
 
         $this->view->title      = $this->products[$productID] . $this->lang->colon . $this->lang->testtask->cases;
         $this->view->position[] = html::a($this->createLink('testtask', 'browse', "productID=$productID"), $this->products[$productID]);
@@ -592,7 +593,7 @@ class testtask extends control
                     ->andWhere('product')->eq($productID)
                     ->beginIF($linkedCases)->andWhere('id')->notIN($linkedCases)->fi()
                     ->beginIF($task->branch)->andWhere('branch')->in("0,$task->branch")->fi()
-                    ->andWhere('story')->in(trim($stories, ','))
+                    ->andWhere('story')->in($stories)
                     ->andWhere('deleted')->eq(0)
                     ->orderBy('id desc')
                     ->page($pager)
@@ -609,7 +610,7 @@ class testtask extends control
                     ->andWhere('product')->eq($productID)
                     ->beginIF($linkedCases)->andWhere('id')->notIN($linkedCases)->fi()
                     ->beginIF($task->branch)->andWhere('branch')->in("0,$task->branch")->fi()
-                    ->andWhere('fromBug')->in(trim($bugs, ','))
+                    ->andWhere('fromBug')->in($bugs)
                     ->andWhere('deleted')->eq(0)
                     ->orderBy('id desc')
                     ->page($pager)

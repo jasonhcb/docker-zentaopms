@@ -98,7 +98,7 @@ class bug extends control
         $pager = pager::init($recTotal, $recPerPage, $pageID);
 
         /* Get projects. */
-        $projects = $this->loadModel('project')->getPairs('empty|withdelete');
+        $projects = $this->loadModel('project')->getPairs('empty');
 
         /* Get bugs. */
         $bugs = $this->bug->getBugs($productID, $projects, $branch, $browseType, $moduleID, $queryID, $sort, $pager);
@@ -114,8 +114,8 @@ class bug extends control
 
         /* Build the search form. */
         $actionURL = $this->createLink('bug', 'browse', "productID=$productID&branch=$branch&browseType=bySearch&queryID=myQueryID");
-        $this->config->bug->search['onMenuBar'] = 'yes';
         $this->bug->buildSearchForm($productID, $this->products, $queryID, $actionURL);
+        $this->loadModel('search')->mergeFeatureBar('bug', 'browse');
 
         $showModule = !empty($this->config->datatable->bugBrowse->showModule) ? $this->config->datatable->bugBrowse->showModule : '';
         $this->view->modulePairs = $showModule ? $this->tree->getModulePairs($productID, 'bug', $showModule) : array();

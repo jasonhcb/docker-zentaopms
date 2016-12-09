@@ -15,10 +15,10 @@
  */
 $config->git = new stdClass();
 $config->git->encodings = 'utf-8, gbk';  
-$config->git->client    = '';
+$config->git->client    = '/usr/bin/git';
 
 $i = 1;
-$config->git->repos[$i]['path'] = '';
+$config->git->repos[$i]['path'] = '/Applications/MAMP/htdocs/ztp/zentaopms';
 
 /*
 $i ++;

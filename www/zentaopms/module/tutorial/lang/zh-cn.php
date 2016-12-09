@@ -9,6 +9,7 @@
  * @version     $Id: zh-cn.php 5116 2013-07-12 06:37:48Z sunhao@cnezsoft.com $
  * @link        http://www.zentao.net
  */
+
 $lang->tutorial = new stdclass();
 $lang->tutorial->common           = '新手教程';
 $lang->tutorial->desc             = '通过完成一系列任务，快速了解禅道的基本使用方法。这可能会花费您10分钟，你可以随时退出任务。';
@@ -34,9 +35,9 @@ $lang->tutorial->dataNotSave      = "教程任务中，数据不会保存。";
 
 $lang->tutorial->tasks = array();
 
-$lang->tutorial->tasks['createAccount']         = array('title' => '创建帐号');
+$lang->tutorial->tasks['createAccount']         = array('title' => '创建账号');
 $lang->tutorial->tasks['createAccount']['nav']  = array('module' => 'user', 'method' => 'create', 'menuModule' => 'company', 'menu' => 'addUser', 'form' => '#dataform', 'submit' => '#submit', 'targetPageName' => '添加用户');
-$lang->tutorial->tasks['createAccount']['desc'] = "<p>在系统创建一个新的用户帐号：</p><ul><li data-target='nav'>打开 <span class='task-nav'>组织 <i class='icon icon-angle-right'></i> 用户 <i class='icon icon-angle-right'></i> 添加用户</span> 页面；</li><li data-target='form'>在添加用户表单中填写新用户信息；</li><li data-target='submit'>保存用户信息。</li></ul>";
+$lang->tutorial->tasks['createAccount']['desc'] = "<p>在系统创建一个新的用户账号：</p><ul><li data-target='nav'>打开 <span class='task-nav'>组织 <i class='icon icon-angle-right'></i> 用户 <i class='icon icon-angle-right'></i> 添加用户</span> 页面；</li><li data-target='form'>在添加用户表单中填写新用户信息；</li><li data-target='submit'>保存用户信息。</li></ul>";
 
 $lang->tutorial->tasks['createProduct']         = array('title' => '创建产品');
 $lang->tutorial->tasks['createProduct']['nav']  = array('module' => 'product', 'method' => 'create', 'menu' => 'create', 'form' => '#dataform', 'submit' => '#submit', 'targetPageName' => '新增产品');

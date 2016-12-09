@@ -12,8 +12,7 @@
 ?>
 <?php include '../../common/view/header.lite.html.php';?>
 <?php include '../../common/view/datepicker.html.php';?>
-<?php js::set('confirmRecord',    $lang->task->confirmRecord);?>
-<?php js::set('noticeSaveRecord', $lang->task->noticeSaveRecord);?>
+<?php js::set('confirmRecord', $lang->task->confirmRecord);?>
 <div id='titlebar'>
   <div class='heading'>
     <span class='prefix'><?php echo html::icon($lang->icons['task']);?> <strong><?php echo $task->id;?></strong></span>

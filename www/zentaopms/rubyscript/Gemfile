@@ -1,0 +1,6 @@
+source 'https://ruby.taobao.org'
+gem 'activerecord-oracle_enhanced-adapter', '~> 1.6.0'
+gem 'activerecord'
+gem 'mysql2'
+gem 'ruby-oci8'
+gem 'spreadsheet'

@@ -1,0 +1,146 @@
+
+#wrap {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50px;
+	bottom: 15px;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+}
+*html #wrap {
+	height:100%; 
+	top:0; 
+	bottom:0; 
+	border-top:50px solid #fff; 
+	border-bottom:15px solid #fff;
+}
+#wrap .outer {
+	height: 100%;
+	border: none;
+}
+.left-menu {
+	height: 100%;
+	width: 25%;
+	float: left;
+	margin: 0;
+}
+.menu-panel {
+	height: 100%;
+	position: relative;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-color: #ddd;
+    border-radius: 2px;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+}
+.menu-body {
+	position: absolute;
+	top: 5px;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	overflow: auto;
+}
+.menu-body ul {
+	padding: 0;
+	list-style: none;
+}
+.menu-body li {
+    padding: 5px 10px;
+}
+
+.menu-body a {
+    color: #000;
+    text-decoration: none;
+    display: block;
+}
+.menu-body .menu-h1{
+	font-size: 14px;
+	font-weight: 700;
+}
+.menu-body .menu-h2 {
+    padding-left: 30px;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.menu-body .menu-h3 {
+    padding-left: 60px;
+}
+
+.menu-body .menu-h4 {
+    padding-left: 75px;
+}
+
+.menu-body .menu-active {
+    background: #F2FBFB;
+}
+
+.right-content {
+	width: 60%;
+	height: 100%;
+	float: right;
+}
+.content-panel {
+	height: 100%;
+	position: relative;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-color: #ddd;
+    border-radius: 2px;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+}
+.content-body {
+	position: absolute;
+	top: 5px;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 10px;
+	overflow: auto;
+}
+.dl-inline{
+     padding: 10px 0;
+     color: #686868;
+    font-size: 12px;
+ }
+ 
+.highlight{
+	background:yellow;
+	font-weight:bold;
+	color:white;
+}
+.current-highlight{
+	background:orange;
+	font-weight:bold;
+	color:white;
+}
+
+#searchBox{
+	position: fixed;
+    top:80px;
+    right: 50px;
+	filter:alpha(opacity=50); 
+	-moz-opacity:0.5; 
+	-khtml-opacity: 0.5; 
+	opacity: 0.5;
+	z-index: 99;
+}
+.searchButton{
+    background-color:#369;
+    border:0 none;
+    color:#F0FFFF;
+    cursor:pointer;
+    padding:4px 8px;
+}
+#titlebar{
+    top: 0;
+	left: 0;
+	margin: 0;
+    width: 100%;
+    position:fixed; 
+}

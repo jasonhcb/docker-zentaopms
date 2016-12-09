@@ -144,7 +144,6 @@ class mailModel extends model
         if(!$connection) return false;
         fclose($connection); 
 
-        $config = new stdclass();
         $config->username = $username;
         $config->host     = $host;
         $config->auth     = 1;
@@ -304,13 +303,7 @@ class mailModel extends model
         }
         catch (phpmailerException $e) 
         {
-            $mailError = ob_get_contents();
-            if(extension_loaded('mbstring'))
-            {
-                $encoding = mb_detect_encoding($mailError, array('ASCII','UTF-8','GB2312','GBK','BIG5'));
-                if($encoding != 'UTF-8') $mailError = mb_convert_encoding($mailError, 'utf8', $encoding);
-            }
-            $this->errors[] = nl2br(trim(strip_tags($e->errorMessage()))) . '<br />' . $mailError;
+            $this->errors[] = nl2br(trim(strip_tags($e->errorMessage()))) . '<br />' . ob_get_contents();
         } 
         catch (Exception $e) 
         {

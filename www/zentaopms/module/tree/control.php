@@ -28,26 +28,27 @@ class tree extends control
         if(strpos('story|bug|case', $viewType) !== false)
         {
             $product = $this->loadModel('product')->getById($rootID);
-            if($product->type != 'normal')
-            {
-                $branches = $this->loadModel('branch')->getPairs($product->id);
-                if($currentModuleID)
-                {
-                    $branchName = $branches[$branch];
-                    unset($branches);
-                    $branches[$branch] = $branchName;
-                }
-                $this->view->branches = $branches;
-            }
+            if($product->type != 'normal') $this->view->branches = $this->loadModel('branch')->getPairs($product->id);
             $this->view->root = $product;
         }
         /* The viewType is doc. */
         elseif(strpos($viewType, 'doc') !== false)
         {
             $this->loadModel('doc');
-            $viewType = 'doc';
-            $lib = $this->doc->getLibById($rootID);
-            $this->view->root = $lib;
+            if($rootID == 'product' or $rootID == 'project')
+            {
+                $viewType = $rootID . 'doc';
+                $lib = new stdclass();
+                $lib->id   = $rootID;
+                $lib->name = $this->lang->doc->systemLibs[$rootID];
+                $this->view->root = $lib;
+            }
+            else
+            {
+                $viewType = 'customdoc';
+                $lib = $this->loadModel('doc')->getLibById($rootID);
+                $this->view->root = $lib;
+            }
         }
 
         if($viewType == 'story')
@@ -93,8 +94,7 @@ class tree extends control
         }
         elseif(strpos($viewType, 'doc') !== false)
         {
-            $type = $lib->product ? 'product' : ($lib->project ? 'project' : 'custom');
-            $this->doc->setMenu($this->doc->getLibs($type), $rootID, $currentModuleID);
+            $this->doc->setMenu($this->doc->getLibs(), $rootID, 'doc');
             $this->lang->tree->menu      = $this->lang->doc->menu;
             $this->lang->tree->menuOrder = $this->lang->doc->menuOrder;
             $this->lang->set('menugroup.tree', 'doc');
@@ -183,7 +183,7 @@ class tree extends control
         }
 
         $module = $this->tree->getById($moduleID);
-        if($module->owner == null and $module->root != 0 and $module->type != 'task' and $type != 'doc')
+        if($module->owner == null and $module->root != 0 and $module->type != 'task')
         {
             $module->owner = $this->loadModel('product')->getById($module->root)->QD;
         }

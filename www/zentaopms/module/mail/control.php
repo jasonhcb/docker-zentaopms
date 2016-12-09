@@ -58,14 +58,12 @@ class mail extends control
     {
         if($_POST)
         {
-            set_time_limit(30);
             $error = '';
             if($this->post->fromAddress == false) $error = sprintf($this->lang->error->notempty, $this->lang->mail->fromAddress);
             if(!validater::checkEmail($this->post->fromAddress)) $error .= '\n' . sprintf($this->lang->error->email, $this->lang->mail->fromAddress);
 
             if($error) die(js::alert($error));
 
-            echo "<script>setTimeout(function(){parent.location.href='" . inlink('edit') . "'}, 10000)</script>";
             $mailConfig = $this->mail->autoDetect($this->post->fromAddress);
             $mailConfig->fromAddress = $this->post->fromAddress;
             $this->session->set('mailConfig',  $mailConfig);
@@ -192,7 +190,6 @@ class mail extends control
 
             $mailConfig->turnon         = $this->post->turnon;
             $mailConfig->mta            = 'sendcloud';
-            $mailConfig->async          = $this->post->async;
             $mailConfig->fromAddress    = ''; 
             $mailConfig->fromName       = '';
             $mailConfig->sendcloud->accessKey = trim($this->post->accessKey);
@@ -214,7 +211,6 @@ class mail extends control
             $mailConfig->fromAddress = $this->config->mail->fromAddress;
             $mailConfig->fromName    = $this->config->mail->fromName;
             $mailConfig->turnon      = $this->config->mail->turnon;
-            $mailConfig->async       = isset($this->config->mail->async) ? $this->config->mail->async : 0;
         }
 
         $this->view->title      = $this->lang->mail->sendCloud;
@@ -300,7 +296,7 @@ class mail extends control
         foreach($queueList as $queue)
         {
             $mailStatus = $this->dao->select('*')->from(TABLE_MAILQUEUE)->where('id')->eq($queue->id)->fetch('status');
-            if(empty($mailStatus) or $mailStatus != 'wait') continue;
+            if(empty($mailStatus) or $mailStatus != 'wait') break;
 
             $this->dao->update(TABLE_MAILQUEUE)->set('status')->eq('sending')->where('id')->eq($queue->id)->exec();
             $this->mail->send($queue->toList, $queue->subject, $queue->body, $queue->ccList);
@@ -321,7 +317,7 @@ class mail extends control
 
         /* Delete sended mail. */
         $lastMail  = $this->dao->select('id,status')->from(TABLE_MAILQUEUE)->orderBy('id_desc')->limit(1)->fetch();
-        if(!empty($lastMail) and $lastMail->id > 1000000)
+        if($lastMail->id > 1000000)
         {
             $unSendNum = $this->dao->select('count(id) as count')->from(TABLE_MAILQUEUE)->where('status')->eq('wait')->fetch('count');
             if($unSendNum == 0) $this->dao->exec('TRUNCATE table ' . TABLE_MAILQUEUE);
@@ -426,7 +422,7 @@ class mail extends control
                 $result = $this->mail->syncSendCloud($action, $email, $realnameAndEmail->realname);
                 if(!$result->result)
                 {
-                    echo(js::alert($this->lang->mail->sendCloudFail . str_replace("'", '"', $result->message) . "(CODE: $result->statusCode)"));
+                    echo(js::alert($this->lang->mail->sendCloudFail . $result->message . "(CODE: $result->statusCode)"));
                     die(js::reload('parent'));
                 }
 

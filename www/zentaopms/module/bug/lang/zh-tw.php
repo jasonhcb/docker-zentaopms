@@ -91,7 +91,6 @@ $lang->bug->saveTemplate       = '保存模板';
 $lang->bug->setPublic          = '設為公共模板';
 $lang->bug->deleteTemplate     = '刪除模板';
 $lang->bug->confirmStoryChange = '確認需求變動';
-$lang->bug->copy               = '複製Bug';
 
 /* 查詢條件列表。*/
 $lang->bug->assignToMe     = '指派給我';
@@ -140,7 +139,7 @@ $lang->bug->confirmDelete        = '您確認要刪除該Bug嗎？';
 $lang->bug->setTemplateTitle     = '請輸入bug模板標題';
 $lang->bug->remindTask           = '該Bug已經轉化為任務，是否更新任務(編號:%s)狀態 ?';
 $lang->bug->skipClose            = 'Bug %s 不是已解決狀態，不能關閉。';
-$lang->bug->applyTemplate        = '應用模板';
+$lang->bug->applyTemplate        = '應用模版';
 
 /* 模板。*/
 $lang->bug->tplStep   = "<p>[步驟]</p>\n";

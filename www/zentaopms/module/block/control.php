@@ -22,7 +22,7 @@ class block extends control
         parent::__construct($moduleName, $methodName);
         /* Mark the call from zentao or ranzhi. */
         $this->selfCall = strpos($this->server->http_referer, common::getSysURL()) === 0 || $this->session->blockModule;
-        if($this->methodName != 'admin' and $this->methodName != 'dashboard' and !$this->selfCall and !$this->loadModel('sso')->checkKey()) die('');
+        //if($this->methodName != 'admin' and $this->methodName != 'dashboard' and !$this->selfCall and !$this->loadModel('sso')->checkKey()) die('');
     }
 
     /**
@@ -187,7 +187,6 @@ class block extends control
      */
     public function dashboard($module)
     {
-        $this->session->set('blockModule', $module);
         $blocks = $this->block->getBlockList($module);
         $inited = empty($this->config->$module->common->blockInited) ? '' : $this->config->$module->common->blockInited;
 
@@ -197,8 +196,13 @@ class block extends control
             if($this->block->initBlock($module)) die(js::reload());
         }
 
-        foreach($blocks as $block)
+        foreach($blocks as $key => $block)
         {
+            if($block->block == 'dynamic'&&!common::hasPriv('my', 'dynamic'))
+            {
+                unset($blocks[$key]);
+                continue;
+            }
             $block->params  = json_decode($block->params);
             $blockID = $block->block;
             $source  = empty($block->source) ? 'common' : $block->source;
@@ -275,8 +279,18 @@ class block extends control
         {
             $html = $this->fetch('block', 'flowchart');
         }
+        elseif($block->block == 'bulletin')
+        {
+            $html = $this->fetch('block', 'bulletin');
+        }
         
         die($html);
+    }
+    
+    public function bulletin()
+    {
+        $this->view->bulletins = $this->loadModel('bulletin')->getBulletinData();
+        $this->display();
     }
 
     /**
@@ -487,11 +501,9 @@ class block extends control
         $this->view->testtasks = $this->dao->select('t1.*,t2.name as productName,t3.name as buildName,t4.name as projectName')->from(TABLE_TESTTASK)->alias('t1')
             ->leftJoin(TABLE_PRODUCT)->alias('t2')->on('t1.product=t2.id')
             ->leftJoin(TABLE_BUILD)->alias('t3')->on('t1.build=t3.id')
-            ->leftJoin(TABLE_PROJECT)->alias('t4')->on('t1.project=t4.id')
-            ->leftJoin(TABLE_PROJECTPRODUCT)->alias('t5')->on('t1.project=t5.project')
+            ->leftJoin(TABLE_PROJECT)->alias('t4')->on('t1.build=t4.id')
             ->where('t1.deleted')->eq('0')
             ->andWhere('t1.product')->in(array_keys($products))
-            ->andWhere('t1.product = t5.product')
             ->beginIF($this->params->type != 'all')->andWhere('t1.status')->eq($this->params->type)->fi()
             ->orderBy('t1.id desc')
             ->beginIF($this->viewType != 'json')->limit($this->params->num)->fi()
@@ -587,7 +599,7 @@ class block extends control
         $this->app->loadClass('pager', $static = true);
         $num   = isset($this->params->num) ? $this->params->num : 0;
         $pager = pager::init(0, $num , 1);
-        $this->view->productStats = $this->loadModel('product')->getStats('order_desc', $this->viewType != 'json' ? $pager : '', $this->params->type);
+        $this->view->productStats = $this->loadModel('product')->getStats('order_desc', $this->viewType != 'json' ? $pager : '');
     }
 
     /**

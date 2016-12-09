@@ -15,8 +15,7 @@
   <table class='boards-layout table' id='kanbanHeader'>
     <thead>
       <tr>
-        <?php $hasStory = count($stories) >= 2;?>
-        <?php if($hasStory):?>
+        <?php if($project->type != 'ops'):?>
         <th class='w-p15 col-story'>
           <div class='dropdown inline-block'>
             <a data-toggle='dropdown' href='javascript:;'><?php echo $lang->project->orderList[$orderBy]?> <span class='icon-caret-down'></span> </a>
@@ -44,7 +43,7 @@
   <table class='boards-layout table active-disabled table-bordered' id='kanbanWrapper'>
     <thead>
       <tr>
-        <?php if($hasStory):?>
+        <?php if($project->type != 'ops'):?>
         <th class='w-p15 col-story'> </th>
         <?php endif;?>
         <?php foreach ($taskCols as $col):?><th class='col-<?php echo $col?>'></th><?php endforeach;?>
@@ -53,12 +52,11 @@
     <tbody>
       <?php $rowIndex = 0; ?>
       <?php foreach($stories as $story):?>
-      <?php if(count(get_object_vars($story)) == 0) continue;?>
       <tr data-id='<?php echo $rowIndex++?>'>
-        <?php if($hasStory):?>
+        <?php if($project->type != 'ops'):?>
         <td class='col-story'>
           <?php if(!empty($story->id)):?>
-          <div class='board board-story stage-<?php echo $story->stage?>' data-id='<?php echo $story->id?>'>
+          <div class='board board-story' data-id='<?php echo $story->id?>'>
             <div class='board-title'>
               <?php echo html::a($this->createLink('story', 'view', "storyID=$story->id", '', true), $story->title, '', 'class="kanbanFrame" title="' . $story->title . '"');?>
               <div class='board-actions'>
@@ -88,7 +86,7 @@
           <?php endif;?>
         </td>
         <?php endif;?>
-        <?php foreach($taskCols as $col):?>
+        <?php foreach ($taskCols as $col):?>
         <td class='col-droppable col-<?php echo $col?>' data-id='<?php echo $col?>'>
         <?php if(!empty($story->tasks[$col])):?>
           <?php foreach($story->tasks[$col] as $task):?>

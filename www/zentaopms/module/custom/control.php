@@ -253,7 +253,7 @@ class custom extends control
             if($method)
             {
                 $this->app->loadLang($module);
-                customModel::mergeFeatureBar($module, $method);
+                $this->loadModel('search')->mergeFeatureBar($module, $method);
                 /* Mark search query item. */
                 if(isset($this->lang->$module->featureBar[$method]))
                 {
@@ -275,7 +275,7 @@ class custom extends control
         {
             $menu = !empty($method) ? customModel::getFeatureMenu($module, $method) : customModel::getModuleMenu($module, true);
         }
-        die(str_replace("'", '\u0027', json_encode(array('result' => $menu ? 'success' : 'fail', 'menu' => $menu))));
+        die(json_encode(array('result' => $menu ? 'success' : 'fail', 'menu' => $menu), JSON_HEX_QUOT | JSON_HEX_APOS));
     }
 
     /**

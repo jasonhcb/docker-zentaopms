@@ -72,8 +72,6 @@
           <div class='input-group'>
             <span class='input-group-addon'><?php echo $lang->story->source?></span>
             <?php echo html::select('source', $lang->story->sourceList, $source, "class='form-control'");?>
-            <span class='input-group-addon fix-border'><?php echo $lang->comment?></span>
-            <?php echo html::input('sourceNote', $sourceNote, "class='form-control'");?>
           </div>
         </td>
         <?php endif;?>
@@ -126,7 +124,7 @@
                     <span class='pri-text'></span> &nbsp;<span class='caret'></span>
                   </button>
                   <ul class='dropdown-menu pull-right'></ul>
-                  <?php echo html::select('pri', (array)$lang->story->priList, $pri, "class='hide'");?>
+                  <?php echo html::select('pri', (array)$lang->story->priList, $pri, "class='hide'");?> 
                 </div>
                 <?php endif; ?>
                 <?php endif;?>

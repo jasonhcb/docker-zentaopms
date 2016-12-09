@@ -7,14 +7,7 @@
 function loadAllUsers()
 {
     link = createLink('bug', 'ajaxLoadAllUsers', 'selectedUser=' + $('#assignedTo').val());
-    $('#assignedToBox').load(link, function()
-    {
-        moduleID  = $('#module').val();
-        productID = $('#product').val();
-        setAssignedTo(moduleID, productID);
-        $('#assignedTo').chosen(defaultChosenOptions);
-    });
-
+    $('#assignedToBox').load(link, function(){$('#assignedTo').chosen(defaultChosenOptions);});
 }
 
 /**

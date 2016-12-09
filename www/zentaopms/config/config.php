@@ -17,7 +17,7 @@ if(!function_exists('getWebRoot')){function getWebRoot(){}}
 
 /* Basic settings. */
 $config = new config();
-$config->version      = '8.3.1';             // The version of zentaopms. Don't change it.
+$config->version      = '8.2.1';             // The version of zentaopms. Don't change it.
 $config->charset      = 'UTF-8';           // The charset of zentaopms.
 $config->cookieLife   = time() + 2592000;  // The cookie life time.
 $config->timezone     = 'Asia/Shanghai';   // The time zone setting, for more see http://www.php.net/manual/en/timezones.php
@@ -85,7 +85,7 @@ $config->file->maxSize = 1024 * 1024;          // Max size.
 $config->ipWhiteList = '*';
 
 /* View type settings. */ 
-$config->devicePrefix = array();
+$config->devicePrefix['mhtml'] = 'm.';
 
 /* Master database settings. */
 $config->db = new stdclass();
@@ -169,8 +169,12 @@ define('TABLE_EXTENSION',     '`' . $config->db->prefix . 'extension`');
 define('TABLE_CRON',          '`' . $config->db->prefix . 'cron`');
 define('TABLE_MAILQUEUE',     '`' . $config->db->prefix . 'mailqueue`');
 define('TABLE_BLOCK',         '`' . $config->db->prefix . 'block`');
-define('TABLE_DOCCONTENT',    '`' . $config->db->prefix . 'doccontent`');
+define('TABLE_DEVCENTER',         '`' . $config->db->prefix . 'devcenter`');
+define('TABLE_PROFRAMEWORK',         '`' . $config->db->prefix . 'proframework`');
+define('TABLE_CENTERUSER',         '`' . $config->db->prefix . 'centeruser`');
+define('TABLE_ALLOCATION',         '`' . $config->db->prefix . 'allocation`');
 if(!defined('TABLE_LANG')) define('TABLE_LANG', '`' . $config->db->prefix . 'lang`');
+define('TABLE_HDCPLAN',         '`' . $config->db->prefix . 'hdcplan`');
 
 $config->objectTables['product']     = TABLE_PRODUCT;
 $config->objectTables['story']       = TABLE_STORY;

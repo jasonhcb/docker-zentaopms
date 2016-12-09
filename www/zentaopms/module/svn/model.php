@@ -361,14 +361,13 @@ class svnModel extends model
     public function iconvComment($comment)
     {
         /* Get encodings. */
-        $encodings = str_replace(' ', '', isset($this->config->svn->encodings) ? $this->config->svn->encodings : '');
+        $encodings = str_replace(' ', '', trim($comment));
         if($encodings == '') return $comment;
         $encodings = explode(',', $encodings);
 
         /* Try convert. */
         foreach($encodings as $encoding)
         {
-            if($encoding == 'utf-8') continue;
             $result = @iconv($encoding, 'utf-8', $comment);
             if($result) return $result;
         }
@@ -541,14 +540,7 @@ class svnModel extends model
             if($changes)
             {
                 $historyID = $this->dao->findByAction($record->id)->from(TABLE_HISTORY)->fetch('id');
-                if($historyID)
-                {
-                    $this->dao->update(TABLE_HISTORY)->data($changes)->where('id')->eq($historyID)->exec();
-                }
-                else
-                {
-                    $this->action->logHistory($record->id, array($changes));
-                }
+                $this->dao->update(TABLE_HISTORY)->data($changes)->where('id')->eq($historyID)->exec();
             }
         }
         else
@@ -591,7 +583,6 @@ class svnModel extends model
                 $diff .= $action == 'M' ? "$diffLink\n" : "\n" ;
             }
         }
-        $changes = new stdclass();
         $changes->field = 'subversion';
         $changes->old   = '';
         $changes->new   = '';

@@ -52,19 +52,18 @@ class bugModel extends model
             ->cleanInt('product, module, severity')
             ->join('openedBuild', ',')
             ->join('mailto', ',')
-            ->remove('files, labels,uid')
+            ->remove('files, labels')
             ->get();
 
         /* Check repeat bug. */
         $result = $this->loadModel('common')->removeDuplicate('bug', $bug, "product={$bug->product}");
         if($result['stop']) return array('status' => 'exists', 'id' => $result['duplicate']);
 
-        $bug = $this->loadModel('file')->processEditor($bug, $this->config->bug->editor->create['id'], $this->post->uid);
+        $bug = $this->loadModel('file')->processEditor($bug, $this->config->bug->editor->create['id']);
         $this->dao->insert(TABLE_BUG)->data($bug)->autoCheck()->batchCheck($this->config->bug->create->requiredFields, 'notempty')->exec();
         if(!dao::isError())
         {
             $bugID = $this->dao->lastInsertID();
-            $this->file->updateObjectID($this->post->uid, $bugID, 'bug');
             $this->file->saveUpload('bug', $bugID);
             return array('status' => 'created', 'id' => $bugID);
         }
@@ -473,10 +472,10 @@ class bugModel extends model
             ->setIF($this->post->resolution  == '' and $this->post->resolvedDate =='', 'status', 'active')
             ->setIF($this->post->resolution  != '', 'confirmed', 1)
             ->setIF($this->post->story != false and $this->post->story != $oldBug->story, 'storyVersion', $this->loadModel('story')->getVersion($this->post->story))
-            ->remove('comment,files,labels,uid')
+            ->remove('comment,files,labels')
             ->get();
 
-        $bug = $this->loadModel('file')->processEditor($bug, $this->config->bug->editor->edit['id'], $this->post->uid);
+        $bug = $this->loadModel('file')->processEditor($bug, $this->config->bug->editor->edit['id']);
         $this->dao->update(TABLE_BUG)->data($bug)
             ->autoCheck()
             ->batchCheck($this->config->bug->edit->requiredFields, 'notempty')
@@ -486,11 +485,7 @@ class bugModel extends model
             ->where('id')->eq((int)$bugID)
             ->exec();
 
-        if(!dao::isError())
-        {
-            $this->file->updateObjectID($this->post->uid, $bugID, 'bug');
-            return common::createChanges($oldBug, $bug);
-        }
+        if(!dao::isError()) return common::createChanges($oldBug, $bug);
     }
 
     /**
@@ -1325,13 +1320,13 @@ class bugModel extends model
                 {
                     if(isset($datas[$buildID])) 
                     {
-                        $datas[$buildID]->value += $data->value;
+                        $datas[$buildID]->value++;
                     }
                     else
                     {
                         if(!isset($datas[$buildID])) $datas[$buildID] = new stdclass();
                         $datas[$buildID]->name  = $buildID;
-                        $datas[$buildID]->value = $data->value;
+                        $datas[$buildID]->value = 1;
                     }
                 }
                 unset($datas[$buildIDList]);
@@ -1901,7 +1896,7 @@ class bugModel extends model
         if(strpos($bugQuery, $allProduct) !== false)
         {
             $products = array_keys($this->loadModel('product')->getPrivProducts());
-            $bugQuery = str_replace($allProduct, '1', $bugQuery);
+            $bugQuery = str_replace($allProduct, '1', $this->session->bugQuery);
             $bugQuery = $bugQuery . ' AND `product` ' . helper::dbIN($products);
         }
         if($branch) $bugQuery .= " AND `branch` in('0','$branch')";

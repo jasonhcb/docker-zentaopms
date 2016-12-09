@@ -25,7 +25,7 @@ js::set('bugBrowseType', ($browseType == 'bymodule' and $this->session->bugBrows
         echo $moduleName;
         if($moduleID)
         {
-            $removeLink = $browseType == 'bymodule' ? inlink('browse', "productID=$productID&branch=$branch&browseType=$browseType&param=0&orderBy=$orderBy&recTotal=0&recPerPage={$pager->recPerPage}") : 'javascript:removeCookieByKey("bugModule")';
+            $removeLink = $browseType == 'bymodule' ? inlink('browse', "productID=$productID&branch=$branch&browseType=$browseType&param=0&orderBy=$orderBy&recTotal={$pager->recTotal}&recPerPage={$pager->recPerPage}") : 'javascript:removeCookieByKey("bugModule")';
             echo html::a($removeLink, "<i class='icon icon-remove'></i>", '', "class='text-muted'");
         }
         ?>
@@ -67,7 +67,7 @@ js::set('bugBrowseType', ($browseType == 'bymodule' and $this->session->bugBrows
       if(commonModel::isTutorialMode())
       {
           $wizardParams = helper::safe64Encode("productID=$productID&branch=$branch&extra=moduleID=$moduleID");
-          echo html::a($this->createLink('tutorial', 'wizard', "module=bug&method=create&params=$wizardParams"), "<i class='icon-plus'></i> {$lang->bug->create}",'', "class='btn btn-bug-create'");
+          common::printIcon('tutorial', 'wizard', "module=bug&method=create&params=$wizardParams", 'btn', 'button', 'plus', '', 'btn-bug-create', '', false, $lang->bug->create);
       }
       else
       {
@@ -112,7 +112,7 @@ js::set('bugBrowseType', ($browseType == 'bymodule' and $this->session->bugBrows
           <td colspan='<?php echo $columns;?>'>
             <?php if(!empty($bugs)):?>
             <div class='table-actions clearfix'>
-              <?php echo html::selectButton();?>
+              <?php if(!$useDatatable) echo html::selectButton();?>
               <div class='btn-group dropup'>
                 <?php
                 $actionLink = $this->createLink('bug', 'batchEdit', "productID=$productID&branch=$branch");
@@ -237,7 +237,7 @@ if($shortcut.size() > 0)
 }
 <?php endif;?>
 <?php $this->app->loadConfig('qa', '', false);?>
-<?php if(isset($this->config->qa->homepage) and $this->config->qa->homepage != 'browse'):?>
+<?php if($this->config->qa->homepage != 'browse'):?>
 $(function(){$('#modulemenu .nav li:last').after("<li class='right'><a style='font-size:12px' href='javascript:setHomepage(\"qa\", \"browse\")'><i class='icon icon-cog'></i><?php echo $lang->homepage?></a></li>")});
 <?php endif;?>
 </script>

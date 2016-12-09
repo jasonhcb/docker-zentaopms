@@ -1,5 +1,5 @@
 table th.col-closed {width:15%}
-#kanbanHeader th{border: 1px solid #ddd; padding:8px;}
+#kanbanHeader th{border: 1px solid #ddd;}
 #kanbanHeader .dropdown {display: inline-block; margin-left: 10px;}
 #kanbanHeader .dropdown > a {color: #036}
 #kanbanHeader  th.col-closed {position: relative}
@@ -44,6 +44,7 @@ table th.col-closed {width:15%}
 .board-bug-closed .board-footer .board-id, .board-task-closed .board-footer .board-id {border-color: #777}
 .board-footer .bug-pri, .board-footer .task-pri, .board-footer .story-pri {margin-right: 10px;}
 
+.board-story {background: #dd7503}
 .board-bug-wait,.board-task-wait {background: #2b529c}
 .board-bug-doing,.board-task-doing {background: #D2322D}
 .board-bug-done,.board-task-done {background: #229F24}
@@ -67,14 +68,6 @@ table th.col-closed {width:15%}
 .story-pri.pri-2 {background-color:#E84E0E;}
 .story-pri.pri-3 {background-color:#b56a00;}
 .story-pri.pri-4 {background-color:#795523;}
-
-.board-story {background: #dd7503}
-.board-story.stage-projected  {background-color:#777;}
-.board-story.stage-developing {background-color:#D2322D;}
-.board-story.stage-developed  {background-color:#229F24;}
-.board-story.stage-testing    {background-color:#EF6C00;}
-.board-story.stage-tested     {background-color:#827717;}
-.board-story.stage-released   {background-color:#9C27B0;}
 
 .bug-pri,.task-pri {display: inline-block; width: 16px; height: 16px; text-align: center; border-radius: 8px; border: 1px solid #ddd; font-size: 12px}
 

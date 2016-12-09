@@ -43,7 +43,7 @@ class actionModel extends model
         $action->actor      = $actor;
         $action->action     = $actionType;
         $action->date       = helper::now();
-        $action->comment    = $this->loadModel('file')->pasteImage(trim(strip_tags($comment, $this->config->allowedTags)), $this->post->uid);
+        $action->comment    = $this->loadModel('file')->pasteImage(trim(strip_tags($comment, $this->config->allowedTags)));
         $action->extra      = $extra;
 
         /* Get product and project for this object. */
@@ -52,7 +52,6 @@ class actionModel extends model
         $action->project    = $productAndProject['project'];
 
         $this->dao->insert(TABLE_ACTION)->data($action)->autoCheck()->exec();
-        $this->file->updateObjectID($this->post->uid, $objectID, $objectType);
         return $this->dbh->lastInsertID();
     }
 
@@ -493,20 +492,6 @@ class actionModel extends model
         $beginAndEnd = $this->computeBeginAndEnd($period);
         extract($beginAndEnd);
 
-        /* Build has priv condition. */
-        if($productID == 'all') $products = $this->loadModel('product')->getPairs();
-        if($projectID == 'all') $projects = $this->loadModel('project')->getPairs();
-        if($productID == 'all' or $projectID == 'all')
-        {
-            $projectCondition = $projectID == 'all' ? "project " . helper::dbIN(array_keys($projects)) : '';
-            $productCondition = $productID == 'all' ? "INSTR('," . join(',', array_keys($products)) . ",', product) > 0" : '';
-
-            $condition = "(product =',0,' AND project = '0')";
-            if($projectCondition) $condition .= ' OR ' . $projectCondition;
-            if($productCondition) $condition .= ' OR ' . $productCondition;
-            if(strpos($this->app->company->admins, ',' . $this->app->user->account . ',') !== false) $condition = 1; 
-        }
-
         /* Get actions. */
         $actions = $this->dao->select('*')->from(TABLE_ACTION)
             ->where(1)
@@ -517,7 +502,6 @@ class actionModel extends model
             ->beginIF(is_numeric($projectID))->andWhere('project')->eq($projectID)->fi()
             ->beginIF($productID == 'notzero')->andWhere('product')->gt(0)->fi()
             ->beginIF($projectID == 'notzero')->andWhere('project')->gt(0)->fi()
-            ->beginIF($projectID == 'all' or $productID == 'all')->andWhere("($condition)")->fi()
             ->orderBy($orderBy)->page($pager)->fetchAll();
 
         if(!$actions) return array();
@@ -690,7 +674,7 @@ class actionModel extends model
     {
         $this->app->loadClass('date');
 
-        $today      = date('Y-m-d');
+        $today      = date::today();
         $tomorrow   = date::tomorrow();
         $yesterday  = date::yesterday();
         $twoDaysAgo = date::twoDaysAgo();
@@ -796,12 +780,6 @@ class actionModel extends model
         $table = $this->config->objectTables[$action->objectType];
         $this->dao->update($table)->set('deleted')->eq(0)->where('id')->eq($action->objectID)->exec();
 
-        /* Revert doclib when undelet product or project. */
-        if($action->objectType == 'project' or $action->objectType == 'product')
-        {
-            $this->dao->update(TABLE_DOCLIT)->set('deleted')->eq(0)->where($action->objectType)->eq($action->objectID)->exec();
-        }
-
         /* Update action record in action table. */
         $this->dao->update(TABLE_ACTION)->set('extra')->eq(ACTIONMODEL::BE_UNDELETED)->where('id')->eq($actionID)->exec();
         $this->create($action->objectType, $action->objectID, 'undeleted');
@@ -847,13 +825,11 @@ class actionModel extends model
      */
     public function updateComment($actionID)
     {
-        $comment = $this->loadModel('file')->pasteImage(trim(strip_tags($this->post->lastComment, $this->config->allowedTags)), $this->post->uid);
-        $action = $this->getById($actionID);
+        $comment = $this->loadModel('file')->pasteImage(trim(strip_tags($this->post->lastComment, $this->config->allowedTags)));
         $this->dao->update(TABLE_ACTION)
             ->set('date')->eq(helper::now())
             ->set('comment')->eq($comment)
             ->where('id')->eq($actionID)
             ->exec();
-        $this->file->updateObjectID($this->post->uid, $action->objectID, $action->objectType);
     }
 }

@@ -7,11 +7,6 @@
 </div>
 <div class='side'>
   <?php include 'blockreportlist.html.php';?>
-  <div class='panel panel-body' style='padding: 10px 6px'>
-    <div class='text proversion'>
-      <strong class='text-danger small text-latin'>PRO</strong> &nbsp;<span class='text-important'><?php echo $lang->report->proVersion;?></span>
-    </div>
-  </div>
 </div>
 
 <div class='main'>

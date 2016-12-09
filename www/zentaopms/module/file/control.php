@@ -47,7 +47,7 @@ class file extends control
      * @access public
      * @return void
      */
-    public function ajaxUpload($uid = '')
+    public function ajaxUpload()
     {
         $file = $this->file->getUpload('imgFile');
         $file = $file[0];
@@ -65,53 +65,12 @@ class file extends control
                 $this->dao->insert(TABLE_FILE)->data($file)->exec();
 
                 $url = $this->file->webPath . $file['pathname'];
-                if($uid) $_SESSION['album'][$uid][] = $this->dao->lastInsertID();
                 die(json_encode(array('error' => 0, 'url' => $url)));
             }
             else
             {
                 $error = strip_tags(sprintf($this->lang->file->errorCanNotWrite, $this->file->savePath, $this->file->savePath));
                 die(json_encode(array('error' => 1, 'message' => $error)));
-            }
-        }
-    }
-
-    /**
-     * AJAX: get upload request from the web editor.
-     * 
-     * @access public
-     * @return void
-     */
-    public function ajaxUeditorUpload($uid = '')
-    {
-        if($this->get->action == 'config')
-        {
-            die(json_encode($this->config->file->ueditor));
-        }
-
-        $file = $this->file->getUpload('upfile');
-        $file = $file[0];
-        if($file)
-        {
-            if($file['size'] == 0) die(json_encode(array('state' => $this->lang->file->errorFileUpload)));
-            if(@move_uploaded_file($file['tmpname'], $this->file->savePath . $file['pathname']))
-            {
-                /* Compress image for jpg and bmp. */
-                $file = $this->file->compressImage($file);
-
-                $file['addedBy']    = $this->app->user->account;
-                $file['addedDate']  = helper::today();
-                unset($file['tmpname']);
-                $this->dao->insert(TABLE_FILE)->data($file)->exec();
-
-                $url = $this->file->webPath . $file['pathname'];
-                if($uid) $_SESSION['album'][$uid][] = $this->dao->lastInsertID();
-                die(json_encode(array('state' => 'SUCCESS', 'url' => $url)));
-            }
-            else
-            {
-                $error = strip_tags(sprintf($this->lang->file->errorCanNotWrite, $this->file->savePath, $this->file->savePath));
-                die(json_encode(array('state' => $error)));
             }
         }
     }
@@ -264,7 +223,7 @@ class file extends control
         if(strpos($fileName, $extension) === false) $fileName .= $extension;
 
         /* urlencode the filename for ie. */
-        if(strpos($this->server->http_user_agent, 'MSIE') !== false or strpos($this->server->http_user_agent, 'Trident') !== false) $fileName = urlencode($fileName);
+        if(strpos($this->server->http_user_agent, 'Trident') !== false) $fileName = urlencode($fileName);
 
         /* Judge the content type. */
         $mimes = $this->config->file->mimes;
@@ -349,11 +308,11 @@ class file extends control
      * @access public
      * @return void
      */
-    public function ajaxPasteImage($uid = '')
+    public function ajaxPasteImage()
     {
         if($_POST)
         {
-            echo $this->file->pasteImage($this->post->editor, $uid);
+            echo $this->file->pasteImage($this->post->editor);
         }
     }
 

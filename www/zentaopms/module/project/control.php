@@ -39,7 +39,7 @@ class project extends control
      */
     public function index($locate = 'auto', $projectID = 0)
     {
-        if($this->app->user->account == 'guest' or commonModel::isTutorialMode()) $this->config->project->homepage = 'index';
+        if($this->app->user->account == 'guest') $this->config->project->homepage = 'index';
         if(!isset($this->config->project->homepage))
         { 
             if($this->projects) die($this->fetch('custom', 'ajaxSetHomepage', "module=project"));
@@ -158,8 +158,8 @@ class project extends control
 
         /* Set queryID, moduleID and productID. */
         $queryID   = ($browseType == 'bysearch')  ? (int)$param : 0;
-        $moduleID  = ($browseType == 'bymodule')  ? (int)$param : (($browseType == 'bysearch' or $browseType == 'byproduct') ? 0 : $this->cookie->moduleBrowseParam);
-        $productID = ($browseType == 'byproduct') ? (int)$param : (($browseType == 'bysearch' or $browseType == 'bymodule')  ? 0 : $this->cookie->productBrowseParam);
+        $moduleID  = ($browseType == 'bymodule')  ? (int)$param : ($browseType == 'bysearch' ? 0 : $this->cookie->moduleBrowseParam);
+        $productID = ($browseType == 'byproduct') ? (int)$param : ($browseType == 'bysearch' ? 0 : $this->cookie->productBrowseParam);
 
         /* Save to session. */
         $uri = $this->app->getURI(true);
@@ -189,8 +189,8 @@ class project extends control
 
        /* Build the search form. */
         $actionURL = $this->createLink('project', 'task', "projectID=$projectID&status=bySearch&param=myQueryID");
-        $this->config->project->search['onMenuBar'] = 'yes';
         $this->project->buildSearchForm($projectID, $this->projects, $queryID, $actionURL);
+        $this->loadModel('search')->mergeFeatureBar('project', 'task');
 
         /* team member pairs. */
         $memberPairs = array();
@@ -249,7 +249,7 @@ class project extends control
 
         /* Get tasks and group them. */
         if(empty($groupBy))$groupBy = 'story';
-        $tasks       = $this->loadModel('task')->getProjectTasks($projectID, $productID = 0, $status = 'all', $modules = 0, $groupBy);
+        $tasks       = $this->loadModel('task')->getProjectTasks($projectID, $status = 'all', $modules = 0, $groupBy);
         $groupBy     = str_replace('`', '', $groupBy);
         $taskLang    = $this->lang->task;
         $groupByList = array();
@@ -289,7 +289,7 @@ class project extends control
                 $groupTasks[$task->$groupBy][] = $task;
             }
         }
-
+        krsort($groupTasks);
         /* Assign. */
         $this->app->loadLang('tree');
         $this->view->members     = $this->project->getTeamMembers($projectID);
@@ -839,7 +839,6 @@ class project extends control
         $this->view->position[] = $this->lang->project->doc;
         $this->view->project    = $project;
         $this->view->docs       = $this->loadModel('doc')->getProjectDocs($projectID);
-        $this->view->libs       = $this->doc->getLibByObject('project', $projectID);
         $this->view->modules    = $this->doc->getProjectModulePairs();
         $this->view->users      = $this->loadModel('user')->getPairs('noletter');
         $this->display();
@@ -1221,12 +1220,6 @@ class project extends control
      */
     public function kanban($projectID, $orderBy = 'pri_asc')
     {
-        /* Save to session. */
-        $uri = $this->app->getURI(true);
-        $this->app->session->set('taskList',  $uri);
-        $this->app->session->set('storyList', $uri);
-        $this->app->session->set('bugList',   $uri);
-
         /* Compatibility IE8*/
         if(strpos($this->server->http_user_agent, 'MSIE 8.0') !== false) header("X-UA-Compatible: IE=EmulateIE7");
 
@@ -1411,7 +1404,6 @@ class project extends control
         else
         {
             $this->project->delete(TABLE_PROJECT, $projectID);
-            $this->dao->update(TABLE_DOCLIB)->set('deleted')->eq(1)->where('project')->eq($projectID)->exec();
             $this->session->set('project', '');
             die(js::locate(inlink('index'), 'parent'));
         }
@@ -1690,8 +1682,6 @@ class project extends control
         $productType  = 'normal';
         $productNum   = count($products);
         $branches     = array();
-        $modules      = array();
-        $this->loadModel('tree');
         foreach($products as $product)
         {
             $productPairs[$product->id] = $product->name;
@@ -1713,16 +1703,14 @@ class project extends control
                     $branchPairs += $productBranches;
                 }
             }
-            foreach($this->tree->getOptionMenu($product->id) as $moduleID => $moduleName) $modules[$moduleID] = $moduleName;
         }
 
         /* Build search form. */
-        if(count($products) >= 2) unset($this->config->product->search['fields']['module']);
+        unset($this->config->product->search['fields']['module']);
         $this->config->product->search['actionURL'] = $this->createLink('project', 'linkStory', "projectID=$projectID&browseType=bySearch&queryID=myQueryID");
         $this->config->product->search['queryID']   = $queryID;
         $this->config->product->search['params']['product']['values'] = $productPairs + array('all' => $this->lang->product->allProductsOfProject);
         $this->config->product->search['params']['plan']['values'] = $this->loadModel('productplan')->getForProducts($products);
-        if(count($products) == 1) $this->config->product->search['params']['module']['values'] = $modules;
         unset($this->lang->story->statusList['draft']);
         if($productType == 'normal')
         {
@@ -1760,7 +1748,6 @@ class project extends control
         $this->view->prjStories   = $prjStories;
         $this->view->browseType   = $browseType;
         $this->view->productType  = $productType;
-        $this->view->modules      = $modules;
         $this->view->users        = $this->loadModel('user')->getPairs('noletter');
         $this->view->branchGroups = $branchGroups;
         $this->display();
@@ -1921,15 +1908,8 @@ class project extends control
     public function ajaxGetMembers($projectID, $assignedTo = '')
     {
         $users      = $this->project->getTeamMemberPairs($projectID);
-        if($this->app->getViewType() === 'json')
-        {
-            die(json_encode($users));
-        }
-        else
-        {
-            $assignedTo = isset($users[$assignedTo]) ? $assignedTo : '';
-            die(html::select('assignedTo', $users, $assignedTo, "class='form-control'"));
-        }
+        $assignedTo = isset($users[$assignedTo]) ? $assignedTo : '';
+        die(html::select('assignedTo', $users, $assignedTo, "class='form-control'"));
     }
 
     /**

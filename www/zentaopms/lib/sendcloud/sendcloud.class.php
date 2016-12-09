@@ -67,7 +67,7 @@ class sendcloud
         if(!empty($this->Subject) and empty($this->subject)) $this->subject = $this->Subject;
 
         $param['accessKey'] = $this->accessKey;
-        $param['nickNames'] = preg_replace('/[^a-zA-z0-9@\._;]/', '_', $this->nickNames);
+        $param['nickNames'] = $this->nickNames;
         $param['subject']   = $this->subject;
         $param['content']   = $this->content;
 
@@ -89,7 +89,6 @@ class sendcloud
     {
         $url = 'http://api.notice.sendcloud.net/linkmanMember/list';
         $param['accessKey'] = $this->accessKey;
-        $param['pageSize']  = 1000;
 
         $result = $this->querySendcloud($url, $param);
         if($result->result == false and $result->statusCode != '481')
@@ -98,7 +97,7 @@ class sendcloud
             return false;
         }
         $members = array();
-        foreach($result->info->linkmanMembers as $member) $members[$member->email] = $member;
+        foreach($result->info->linkmanMembers as $member) $members[$member->nickName] = $member;
 
         return $members;
     }
@@ -114,7 +113,7 @@ class sendcloud
     {
         $url = 'http://api.notice.sendcloud.net/linkmanMember/add';
         $param['accessKey'] = $this->accessKey;
-        $param['nickName']  = preg_replace('/[^a-zA-z0-9@\._]/', '_', $member->nickName);
+        $param['nickName']  = $member->nickName;
         $param['email']     = $member->email;
         if(isset($member->userName)) $param['userName'] = $member->userName;
         if(isset($member->phone))    $param['phone']    = $member->phone;

@@ -141,7 +141,6 @@ class buildModel extends model
         {
             $releases = $this->dao->select('build, name')->from(TABLE_RELEASE)
                 ->where('build')->in(array_keys($builds))
-                ->andWhere('product')->in($products)
                 ->beginIF($branch)->andWhere('branch')->in("0,$branch")->fi()
                 ->andWhere('deleted')->eq(0)
                 ->fetchPairs();
@@ -162,7 +161,7 @@ class buildModel extends model
     {
         return $this->dao->select('id, name')->from(TABLE_BUILD) 
             ->where('project')->eq((int)$projectID)
-            ->orderBy('date DESC,id DESC')
+            ->orderBy('date DESC')
             ->limit(1)
             ->fetch();
     }
@@ -185,10 +184,10 @@ class buildModel extends model
             ->setDefault('branch', 0)
             ->add('project', (int)$projectID)
             ->stripTags($this->config->build->editor->create['id'], $this->config->allowedTags)
-            ->remove('resolvedBy,allchecker,files,labels,uid')
+            ->remove('resolvedBy,allchecker,files,labels')
             ->get();
 
-        $build = $this->loadModel('file')->processEditor($build, $this->config->build->editor->create['id'], $this->post->uid);
+        $build = $this->loadModel('file')->processEditor($build, $this->config->build->editor->create['id']);
         $this->dao->insert(TABLE_BUILD)->data($build)
             ->autoCheck()
             ->batchCheck($this->config->build->create->requiredFields, 'notempty')
@@ -197,7 +196,6 @@ class buildModel extends model
         if(!dao::isError())
         {
             $buildID = $this->dao->lastInsertID();
-            $this->file->updateObjectID($this->post->uid, $buildID, 'build');
             $this->file->saveUpload('build', $buildID);
             return $buildID;
         }
@@ -214,11 +212,11 @@ class buildModel extends model
     {
         $oldBuild = $this->getByID($buildID);
         $build = fixer::input('post')->stripTags($this->config->build->editor->edit['id'], $this->config->allowedTags)
-            ->remove('allchecker,resolvedBy,files,labels,uid')
+            ->remove('allchecker,resolvedBy,files,labels')
             ->get();
         if(!isset($build->branch)) $build->branch = $oldBuild->branch;
 
-        $build = $this->loadModel('file')->processEditor($build, $this->config->build->editor->edit['id'], $this->post->uid);
+        $build = $this->loadModel('file')->processEditor($build, $this->config->build->editor->edit['id']);
         $this->dao->update(TABLE_BUILD)->data($build)
             ->autoCheck()
             ->batchCheck($this->config->build->edit->requiredFields, 'notempty')
@@ -226,11 +224,7 @@ class buildModel extends model
             ->check('name', 'unique', "id != $buildID AND product = {$build->product} AND branch = {$build->branch} AND deleted = '0'")
             ->exec();
         if(isset($build->branch) and $oldBuild->branch != $build->branch) $this->dao->update(TABLE_RELEASE)->set('branch')->eq($build->branch)->where('build')->eq($buildID)->exec();
-        if(!dao::isError())
-        {
-            $this->file->updateObjectID($this->post->uid, $buildID, 'build');
-            return common::createChanges($oldBuild, $build);
-        }
+        if(!dao::isError()) return common::createChanges($oldBuild, $build);
     }
 
     /**
@@ -243,15 +237,14 @@ class buildModel extends model
     public function updateLinkedBug($build)
     {
         $bugs = empty($build->bugs) ? '' : $this->dao->select('*')->from(TABLE_BUG)->where('id')->in($build->bugs)->fetchAll();
-        $data = fixer::input('post')->get();
         $now  = helper::now();
 
         $resolvedPairs = array();
         if(isset($_POST['bugs']))
         {
-            foreach($data->bugs as $key => $bugID)
+            foreach($this->post->bugs as $key => $bugID)
             {
-                if(isset($_POST['resolvedBy'][$key]))$resolvedPairs[$bugID] = $data->resolvedBy[$key];
+                if(isset($_POST['resolvedBy'][$key]))$resolvedPairs[$bugID] = $this->post->resolvedBy[$key];
             }
         }
 

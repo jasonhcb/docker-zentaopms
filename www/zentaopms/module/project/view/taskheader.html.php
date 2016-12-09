@@ -6,7 +6,7 @@
     {
         echo '<div class="label-angle with-close">';
         $product    = $this->product->getById($productID);
-        $removeLink = $browseType == 'byproduct' ? inlink('task', "projectID=$projectID&browseType=$status&param=0&orderBy=$orderBy&recTotal=0&recPerPage={$pager->recPerPage}") : 'javascript:removeCookieByKey("productBrowseParam")';
+        $removeLink = $browseType == 'byproduct' ? inlink('task', "projectID=$projectID&browseType=$status&param=0&orderBy=$orderBy&recTotal={$pager->recTotal}&recPerPage={$pager->recPerPage}") : 'javascript:removeCookieByKey("productBrowseParam")';
         echo '<i class="icon icon-cube"></i> ' . $product->name;
         echo html::a($removeLink, "<span class='close'>&times;</span>", '', "class='text-muted'");
     }
@@ -14,7 +14,7 @@
     {
         echo '<div class="label-angle with-close">';
         $module     = $this->tree->getById($moduleID);
-        $removeLink = $browseType == 'bymodule' ? inlink('task', "projectID=$projectID&browseType=$status&param=0&orderBy=$orderBy&recTotal=0&recPerPage={$pager->recPerPage}") : 'javascript:removeCookieByKey("moduleBrowseParam")';
+        $removeLink = $browseType == 'bymodule' ? inlink('task', "projectID=$projectID&browseType=$status&param=0&orderBy=$orderBy&recTotal={$pager->recTotal}&recPerPage={$pager->recPerPage}") : 'javascript:removeCookieByKey("moduleBrowseParam")';
         echo $module->name;
         echo html::a($removeLink, "<span class='close'>&times;</span>", '', "class='text-muted'");
     }
@@ -29,17 +29,17 @@
     foreach(customModel::getFeatureMenu('project', 'task') as $menuItem)
     {
         if(isset($menuItem->hidden)) continue;
-        $menuType = $menuItem->name;
-        if(strpos($menuType, 'QUERY') === 0)
+        $type = $menuItem->name;
+        if(strpos($type, 'QUERY') === 0)
         {
-            $queryID = (int)substr($menuType, 5);
-            echo "<li id='{$menuType}Tab'>" . html::a(inlink('task', "project=$projectID&type=bySearch&param=$queryID"), $menuItem->text) . '</li>' ;
+            $queryID = (int)substr($type, 5);
+            echo "<li id='{$type}Tab'>" . html::a(inlink('task', "project=$projectID&type=bySearch&param=$queryID"), $menuItem->text) . '</li>' ;
         }
-        elseif($menuType != 'status')
+        elseif($type != 'status')
         {
-            echo "<li id='{$menuType}Tab'>" . html::a(inlink('task', "project=$projectID&type=$menuType"), $menuItem->text) . '</li>' ;
+            echo "<li id='{$type}Tab'>" . html::a(inlink('task', "project=$projectID&type=$type"), $menuItem->text) . '</li>' ;
         }
-        elseif($menuType == 'status')
+        elseif($type == 'status')
         {
             echo "<li id='statusTab' class='dropdown'>";
             $taskBrowseType = isset($status) ? $this->session->taskBrowseType : '';
@@ -57,7 +57,7 @@
         }
     }
 
-    echo "<li id='kanbanTab'>"; common::printLink('project', 'kanban', "projectID=$projectID", $lang->project->kanban); echo '</li>';
+    echo "<li id='kanbanTab'>"; common::printLink('project', 'kanban', "projectID=$projectID", $lang->project->kanban) . '</li>';
     if($project->type == 'sprint' or $project->type == 'waterfall')
     {
         echo "<li id='burnTab'>";

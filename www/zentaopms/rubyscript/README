@@ -1,0 +1,8 @@
+README
+
+设定环境变量
+export NLS_LANG=AMERICAN_AMERICA.ZHS16GBK
+
+1,安装ruby
+2,在本目录下执行bundle install
+3,在本目录下执行NLS_LANG=AMERICAN_AMERICA.ZHS16GBK bundle exec ruby syncdept.rb

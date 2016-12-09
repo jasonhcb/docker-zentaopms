@@ -11,7 +11,6 @@
  */
 ?>
 <?php include '../../common/view/header.lite.html.php';?>
-<?php include '../../common/view/chosen.html.php';?>
 <div id='titlebar'>
   <div class='heading'>
     <span class='prefix'><?php echo html::icon($lang->icons['doclib']);?></span>
@@ -19,52 +18,11 @@
   </div>
 </div>
 <div class='main'>
-  <form method='post' target='hiddenwin' class='form-condensed' style='margin: 40px 0 160px 0'>
-    <table class='table table-form'>
-      <tr>
-        <th class='w-80px'><?php echo $lang->doc->libType?></th>
-        <td><?php echo html::select('libType', $lang->doc->libTypeList, $type, "class='form-control'")?></td>
-      </tr>
-      <tr class='product'>
-        <th><?php echo $lang->doc->product?></th>
-        <td><?php echo html::select('product', $products, $type == 'product' ? $objectID : '', "class='form-control chosen'")?></td>
-      </tr>
-      <tr class='project hidden'>
-        <th><?php echo $lang->doc->project?></th>
-        <td><?php echo html::select('project', $projects, $type == 'project' ? $objectID : '', "class='form-control chosen'")?></td>
-      </tr>
-      <tr>
-        <th><?php echo $lang->doclib->name?></th>
-        <td><?php echo html::input('name', '', "class='form-control'")?></td>
-      </tr>
-      <tr>
-        <th><?php echo $lang->doclib->control;?></th>
-        <td><?php echo html::radio('acl', $lang->doc->aclList, 'open', "onchange='toggleAcl(this.value)'")?></td>
-      </tr>
-      <tr id='whiteListBox' class='hidden'>
-        <th><?php echo $lang->doc->whiteList;?></th>
-        <td>
-          <div class='row-table'>
-            <div class='col-table w-p50'>
-              <div class='input-group w-p100'>
-                <span class='input-group-addon'><?php echo $lang->doclib->group?></span>
-                <?php echo html::select('groups[]', $groups, '', "class='form-control chosen' multiple")?>
-              </div>
-            </div>
-            <div class='col-table'>
-              <div class='input-group w-p100'>
-                <span class='input-group-addon'><?php echo $lang->doclib->user?></span>
-                <?php echo html::select('users[]', $users, '', "class='form-control chosen' multiple")?>
-              </div>
-            </div>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td></td>
-        <td><?php echo html::submitButton();?></td>
-      </tr>
-    </table>
+  <form method='post' class='form-condensed' style='margin: 30px 50px'>
+    <div class='input-group'>
+      <?php echo html::input('name', '', "class='form-control' placeholder='{$lang->doc->libName}'");?>
+      <span class='input-group-btn'><?php echo html::submitButton();?></span>
+    </div>
   </form>
 </div>
 <?php include '../../common/view/footer.lite.html.php';?>

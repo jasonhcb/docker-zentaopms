@@ -22,4 +22,4 @@ include 'chosen.html.php';
 
 <div id='wrap'>
 <?php endif;?>
-  <div class='outer'>
+  <div class='outer' style="min-height: 400px;">

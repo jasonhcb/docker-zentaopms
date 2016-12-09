@@ -304,7 +304,7 @@ class commonModel extends model
         echo "<ul class='dropdown-menu pull-right'>";
         echo '<li>' . html::a('javascript:;', $lang->manual, '', "class='open-help-tab'") . '</li>';
         if(!commonModel::isTutorialMode() and $app->user->account != 'guest') echo '<li>' . html::a(helper::createLink('tutorial', 'start'), $lang->tutorial, '', "class='iframe' data-width='800' data-headerless='true'") . "</li>";
-        echo '<li>' . html::a(helper::createLink('misc', 'changeLog'), $lang->changeLog, '', "class='iframe' data-width='800' data-headerless='true'") . '</li>';
+        //echo '<li>' . html::a(helper::createLink('misc', 'changeLog'), $lang->changeLog, '', "class='iframe' data-width='800' data-headerless='true'") . '</li>';
         echo "</ul></div>";
         echo html::a(helper::createLink('misc', 'about'), $lang->aboutZenTao, '', "class='about iframe' data-width='900' data-headerless='true' data-class='modal-about'");
     }
@@ -342,8 +342,8 @@ class commonModel extends model
         if($role == 'top')
         {
             $this->config->locate->module = 'project';
-            $this->config->locate->method = 'all';
-            $this->config->locate->params = 'status=isdoing';
+            $this->config->locate->method = 'index';
+            $this->config->locate->params = 'locate=no&status=doing';
         }
 
         unset($this->lang->menuOrder);
@@ -634,6 +634,7 @@ class commonModel extends model
         }
         else
         {
+
             $orderBy   = "" . trim($fieldName, '`') . "" . '_' . 'asc';
             $className = 'header';
         }
@@ -969,7 +970,7 @@ class commonModel extends model
         }
         else
         {
-            $queryObjects = $this->dao->query($queryCondition . (empty($orderBy) ? '' : " ORDER BY $orderBy"));
+            $queryObjects = $this->dao->query($queryCondition . " ORDER BY $orderBy");
         }
 
         $preObj  = false;
@@ -1168,7 +1169,7 @@ class commonModel extends model
      * 
      * @param  string $module 
      * @param  string $method 
-     * @static
+     * @staticsetMenuVars
      * @access public
      * @return bool
      */

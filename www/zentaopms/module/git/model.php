@@ -370,14 +370,12 @@ class gitModel extends model
     public function iconvComment($comment)
     {
         /* Get encodings. */
-        $encodings = str_replace(' ', '', isset($this->config->git->encodings) ? $this->config->git->encodings : '');
-        if($encodings == '') return $comment;
-        $encodings = explode(',', $encodings);
+        $encoding = str_replace(' ', '', $this->config->git->encodings);
+        if($encoding == '') return $comment;
 
         /* Try convert. */
-        foreach($encodings as $encoding)
+        if($encoding != 'utf-8')
         {
-            if($encoding == 'utf-8') continue;
             $result = @iconv($encoding, 'utf-8', $comment);
             if($result) return $result;
         }
@@ -558,14 +556,7 @@ class gitModel extends model
             if($changes)
             {
                 $historyID = $this->dao->findByAction($record->id)->from(TABLE_HISTORY)->fetch('id');
-                if($historyID)
-                {
-                    $this->dao->update(TABLE_HISTORY)->data($changes)->where('id')->eq($historyID)->exec();
-                }
-                else
-                {
-                    $this->action->logHistory($record->id, array($changes));
-                }
+                $this->dao->update(TABLE_HISTORY)->data($changes)->where('id')->eq($historyID)->exec();
             }
         }
         else

@@ -49,7 +49,7 @@ class product extends control
      */
     public function index($locate = 'auto', $productID = 0, $status = 'noclosed', $orderBy = 'order_desc', $recTotal = 0, $recPerPage = 10, $pageID = 1)
     {
-        if($this->app->user->account == 'guest' or commonModel::isTutorialMode()) $this->config->product->homepage = 'index';
+        if($this->app->user->account == 'guest') $this->config->product->homepage = 'index';
         if(!isset($this->config->product->homepage))
         {
             if($this->products) die($this->fetch('custom', 'ajaxSetHomepage', "module=product"));
@@ -145,8 +145,7 @@ class product extends control
         setcookie('productStoryOrder', $orderBy, $this->config->cookieLife, $this->config->webRoot);
 
         /* Append id for secend sort. */
-        /* set rule to number when order by plan. */
-        $sort = $this->loadModel('common')->appendOrder(strpos($orderBy, 'plan') !== false ? str_replace('plan', '`plan`+0', $orderBy) : $orderBy);
+        $sort = $this->loadModel('common')->appendOrder($orderBy);
 
         /* Load pager. */
         $this->app->loadClass('pager', $static = true);
@@ -161,8 +160,8 @@ class product extends control
 
         /* Build search form. */
         $actionURL = $this->createLink('product', 'browse', "productID=$productID&branch=$branch&browseType=bySearch&queryID=myQueryID");
-        $this->config->product->search['onMenuBar'] = 'yes';
         $this->product->buildSearchForm($productID, $this->products, $queryID, $actionURL);
+        $this->loadModel('search')->mergeFeatureBar('product', 'browse');
 
         $showModule = !empty($this->config->datatable->productBrowse->showModule) ? $this->config->datatable->productBrowse->showModule : '';
         $this->view->modulePairs = $showModule ? $this->tree->getModulePairs($productID, 'story', $showModule) : array();
@@ -387,7 +386,6 @@ class product extends control
         else
         {
             $this->product->delete(TABLE_PRODUCT, $productID);
-            $this->dao->update(TABLE_DOCLIB)->set('deleted')->eq(1)->where('product')->eq($productID)->exec();
             $this->session->set('product', '');     // 清除session。
             die(js::locate($this->createLink('product', 'browse'), 'parent'));
         }
@@ -411,7 +409,6 @@ class product extends control
         $this->view->position[] = $this->lang->product->doc;
         $this->view->product    = $product;
         $this->view->docs       = $this->loadModel('doc')->getProductDocs($productID);
-        $this->view->libs       = $this->doc->getLibByObject('product', $productID);
         $this->view->users      = $this->loadModel('user')->getPairs('noletter');
         $this->display();
     }
@@ -507,16 +504,7 @@ class product extends control
      */
     public function ajaxGetProjects($productID, $projectID = 0, $branch = 0)
     {
-        if($productID == 0)
-        {
-            $projects = array(0 => '') + $this->loadModel('project')->getPairs();
-        }
-        else
-        {
-            $projects = $this->product->getProjectPairs($productID, $branch ? "0,$branch" : $branch, $params = 'nodeleted');
-        }
-        if($this->app->getViewType() == 'json') die(json_encode($projects));
-        
+        $projects = $this->product->getProjectPairs($productID, $branch ? "0,$branch" : $branch, $params = 'nodeleted');
         die(html::select('project', $projects, $projectID, 'class=form-control onchange=loadProjectRelated(this.value)'));
     }
 

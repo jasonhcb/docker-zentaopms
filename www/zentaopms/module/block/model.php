@@ -34,7 +34,6 @@ class blockModel extends model
             ->setDefault('source', $source)
             ->setDefault('block', $type)
             ->setDefault('params', array())
-            ->remove('uid')
             ->get();
 
         if($type == 'html')

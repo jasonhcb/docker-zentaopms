@@ -104,8 +104,8 @@ class testcase extends control
 
         /* Build the search form. */
         $actionURL = $this->createLink('testcase', 'browse', "productID=$productID&branch=$branch&browseType=bySearch&queryID=myQueryID");
-        $this->config->testcase->search['onMenuBar'] = 'yes';
         $this->testcase->buildSearchForm($productID, $this->products, $queryID, $actionURL);
+        $this->loadModel('search')->mergeFeatureBar('testcase', 'browse');
 
         $showModule = !empty($this->config->datatable->testcaseBrowse->showModule) ? $this->config->datatable->testcaseBrowse->showModule : '';
         $this->view->modulePairs = $showModule ? $this->tree->getModulePairs($productID, 'case', $showModule) : array();
@@ -156,6 +156,7 @@ class testcase extends control
 
         $cases = $this->testcase->getModuleCases($productID, $branch, 0, $groupBy);
         $this->loadModel('common')->saveQueryCondition($this->dao->get(), 'testcase', false);
+        $this->loadModel('search')->mergeFeatureBar('testcase', 'browse');
 
         $groupCases  = array();
         $groupByList = array();
@@ -311,7 +312,7 @@ class testcase extends control
         $this->view->productID        = $productID;
         $this->view->productName      = $this->products[$productID];
         $this->view->moduleOptionMenu = $this->tree->getOptionMenu($productID, $viewType = 'case', $startModuleID = 0, $branch);
-        $this->view->currentModuleID  = $currentModuleID ? $currentModuleID : (isset($story->module) ? $story->module : 0);
+        $this->view->currentModuleID  = $currentModuleID ? $currentModuleID : (isset($stories[$storyID]) ? $stories[$storyID]->module : 0);
         $this->view->stories          = $stories;
         $this->view->type             = $type;
         $this->view->stage            = $stage;
@@ -1030,24 +1031,18 @@ class testcase extends control
             move_uploaded_file($file['tmpname'], $this->file->savePath . $file['pathname']);
 
             $fileName = $this->file->savePath . $file['pathname'];
-            $rows     = $this->file->parseCSV($fileName);
             $fields   = $this->testcase->getImportFields();
-            $fields   = array_flip($fields);
-            $header   = array();
-            foreach($rows[0] as $i => $rowValue)
-            {
-                if(empty($rowValue)) break;
-                $header[$i] = $rowValue;
-            }
+            $rows     = $this->file->parseCSV($fileName);
+            $header   = $rows[0];
             unset($rows[0]);
 
             $columnKey = array();
             foreach($header as $title)
             {
-                if(!isset($fields[$title])) continue;
-                $columnKey[] = $fields[$title];
+                $field = array_search($title, $fields);
+                if(!$field) continue;
+                $columnKey[] = $field;
             }
-
             if(count($columnKey) != count($header) or $this->post->encode != 'utf-8')
             {
                 $fc     = file_get_contents($fileName);
@@ -1066,21 +1061,16 @@ class testcase extends control
                 }
                 file_put_contents($fileName, $fc);
 
-                $rows      = $this->file->parseCSV($fileName);
-                $columnKey = array();
-                $header   = array();
-                foreach($rows[0] as $i => $rowValue)
-                {
-                    if(empty($rowValue)) break;
-                    $header[$i] = $rowValue;
-                }
+                $rows     = $this->file->parseCSV($fileName);
+                $header   = $rows[0];
                 unset($rows[0]);
                 foreach($header as $title)
                 {
-                    if(!isset($fields[$title])) continue;
-                    $columnKey[] = $fields[$title];
+                    $field = array_search($title, $fields);
+                    if(!$field) continue;
+                    $columnKey[] = $field;
                 }
-                if(count($columnKey) != count($header)) die(js::alert($this->lang->testcase->errorEncode));
+                if(empty($columnKey)) die(js::alert($this->lang->testcase->errorEncode));
             }
 
             $this->session->set('importFile', $fileName);
@@ -1113,24 +1103,19 @@ class testcase extends control
         $modules    = $this->loadModel('tree')->getOptionMenu($productID, 'case', 0, $branch);
         $stories    = $this->loadModel('story')->getProductStoryPairs($productID, $branch);
         $fields     = $this->testcase->getImportFields();
-        $fields     = array_flip($fields);
 
         $rows   = $this->loadModel('file')->parseCSV($file);
-        $header   = array();
-        foreach($rows[0] as $i => $rowValue)
-        {
-            if(empty($rowValue)) break;
-            $header[$i] = $rowValue;
-        }
+        $header = $rows[0];
         unset($rows[0]);
 
         foreach($header as $title)
         {
-            if(!isset($fields[$title])) continue;
-            $columnKey[] = $fields[$title];
+            $field = array_search($title, $fields);
+            if(!$field) continue;
+            $columnKey[] = $field;
         }
 
-        $endField = end($fields);
+        $endField = $field;
         $caseData = array();
         $stepData = array();
         foreach($rows as $row => $data)

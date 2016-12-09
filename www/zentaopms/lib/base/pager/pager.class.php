@@ -403,7 +403,6 @@ class basePager
             $pager .= $this->createGoTo();
             $pager .= $this->createRecPerPageJS();
         }
-
         return "<div style='float:$align; clear:none;' class='pager form-inline'>$pager</div>";
     }
 

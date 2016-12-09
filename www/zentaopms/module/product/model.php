@@ -119,7 +119,7 @@ class productModel extends model
         if(strpos($this->app->company->admins, $account) !== false) return true; 
 
         $acls = $this->app->user->rights['acls'];
-        if(!empty($acls['products']) and !in_array($product->id, $acls['products'])) return false;
+        if(!empty($acls['products'])) return !in_array($product->id, $acls['products']) ? false : true;
 
         /* Product is open, return true. */
         if($product->acl == 'open') return true;
@@ -243,9 +243,8 @@ class productModel extends model
              ->setDefault('createdVersion', $this->config->version)
             ->join('whitelist', ',')
             ->stripTags($this->config->product->editor->create['id'], $this->config->allowedTags)
-            ->remove('uid')
             ->get();
-        $product = $this->loadModel('file')->processEditor($product, $this->config->product->editor->create['id'], $this->post->uid);
+        $product = $this->loadModel('file')->processEditor($product, $this->config->product->editor->create['id']);
         $this->dao->insert(TABLE_PRODUCT)->data($product)->autoCheck()
             ->batchCheck('name,code', 'notempty')
             ->check('name', 'unique', "deleted = '0'")
@@ -253,20 +252,7 @@ class productModel extends model
             ->exec();
 
         $productID = $this->dao->lastInsertID();
-        $this->file->updateObjectID($this->post->uid, $productID, 'product');
         $this->dao->update(TABLE_PRODUCT)->set('`order`')->eq($productID * 5)->where('id')->eq($productID)->exec();
-
-        /* Create doc lib. */
-        $this->app->loadLang('doc');
-        $lib = new stdclass();
-        $lib->product = $productID;
-        $lib->name    = $this->lang->doclib->main['product'];
-        $lib->main    = '1';
-        $lib->acl     = $product->acl == 'open' ? 'open' : 'custom';
-        $lib->users   = $this->app->user->account;
-        if($product->acl == 'custom') $lib->groups = $product->whitelist;
-        $this->dao->insert(TABLE_DOCLIB)->data($lib)->exec();
-
         return $productID;
     }
 
@@ -285,28 +271,15 @@ class productModel extends model
             ->setIF($this->post->acl != 'custom', 'whitelist', '')
             ->join('whitelist', ',')
             ->stripTags($this->config->product->editor->edit['id'], $this->config->allowedTags)
-            ->remove('uid')
             ->get();
-        $product = $this->loadModel('file')->processEditor($product, $this->config->product->editor->edit['id'], $this->post->uid);
+        $product = $this->loadModel('file')->processEditor($product, $this->config->product->editor->edit['id']);
         $this->dao->update(TABLE_PRODUCT)->data($product)->autoCheck()
             ->batchCheck('name,code', 'notempty')
             ->check('name', 'unique', "id != $productID and deleted = '0'")
             ->check('code', 'unique', "id != $productID and deleted = '0'")
             ->where('id')->eq($productID)
             ->exec();
-        if(!dao::isError())
-        {
-            if($product->acl != $oldProduct->acl)
-            {
-                $this->dao->update(TABLE_DOCLIB)->set('acl')->eq($product->acl == 'open' ? 'open' : 'custom')->where('product')->eq($productID)->exec();
-                if($product->acl == 'open')    $this->dao->update(TABLE_DOCLIB)->set('groups')->eq('')->where('product')->eq($productID)->exec();
-                if($product->acl == 'custom')  $this->dao->update(TABLE_DOCLIB)->set('groups')->eq($product->whitelist)->where('product')->eq($productID)->exec();
-                if($product->acl == 'private') $this->dao->update(TABLE_DOCLIB)->set('groups')->eq('')->where('product')->eq($productID)->exec();
-                if($product->acl != 'open')    $this->loadModel('doc')->setLibUsers('product', $productID);
-            }
-            $this->file->updateObjectID($this->post->uid, $productID, 'product');
-            return common::createChanges($oldProduct, $product);
-        }
+        if(!dao::isError()) return common::createChanges($oldProduct, $product);
     }
 
     /**
@@ -319,20 +292,19 @@ class productModel extends model
     {
         $products    = array();
         $allChanges  = array();
-        $data        = fixer::input('post')->get();
         $oldProducts = $this->getByIdList($this->post->productIDList);
-        foreach($data->productIDList as $productID)
+        foreach($this->post->productIDList as $productID)
         {
             $products[$productID] = new stdClass();
-            $products[$productID]->name   = $data->names[$productID];
-            $products[$productID]->code   = $data->codes[$productID];
-            $products[$productID]->PO     = $data->POs[$productID];
-            $products[$productID]->QD     = $data->QDs[$productID];
-            $products[$productID]->RD     = $data->RDs[$productID];
-            $products[$productID]->type   = $data->types[$productID];
-            $products[$productID]->status = $data->statuses[$productID];
-            $products[$productID]->desc   = $data->descs[$productID];
-            $products[$productID]->order  = $data->orders[$productID];
+            $products[$productID]->name   = $this->post->names[$productID];
+            $products[$productID]->code   = $this->post->codes[$productID];
+            $products[$productID]->PO     = $this->post->POs[$productID];
+            $products[$productID]->QD     = $this->post->QDs[$productID];
+            $products[$productID]->RD     = $this->post->RDs[$productID];
+            $products[$productID]->type   = $this->post->types[$productID];
+            $products[$productID]->status = $this->post->statuses[$productID];
+            $products[$productID]->desc   = $this->post->descs[$productID];
+            $products[$productID]->order  = $this->post->orders[$productID];
         }
 
         foreach($products as $productID => $product)
@@ -843,11 +815,6 @@ class productModel extends model
         {
             $link = helper::createLink($module, $method, "productID=%s&type=$extra&currentModuleID=0" . ($branch ? "&branch=%s" : ''));
         }
-        else if($module == 'doc')
-        {
-            $link = helper::createLink('doc', 'objectLibs', "type=product&objectID=%s&from=product");
-        }
-
         return $link;
     }
 

@@ -103,7 +103,7 @@ $(function()
         return settings;
     };
 
-    var tasks        = $.parseJSON('<?php echo helper::jsonEncode4Parse($tasks, JSON_HEX_QUOT | JSON_HEX_APOS);?>');
+    var tasks        = $.parseJSON('<?php echo json_encode($tasks, JSON_HEX_QUOT | JSON_HEX_APOS) ?>');
     var current      = '<?php echo $current ?>';
     var setting      = formatSetting('<?php echo $setting ?>');
     var lang         = 
@@ -274,6 +274,7 @@ $(function()
                     var $required = $$('#' + requiredId);
                     if($required.length)
                     {
+                        console.log($required, $required.val());
                         var val = $required.val();
                         if(val === undefined || val === null || val === '')
                         {

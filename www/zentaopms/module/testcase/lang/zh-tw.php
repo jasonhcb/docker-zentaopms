@@ -20,7 +20,7 @@ $lang->testcase->pri              = '優先順序';
 $lang->testcase->type             = '用例類型';
 $lang->testcase->status           = '用例狀態';
 $lang->testcase->steps            = '用例步驟';
-$lang->testcase->openedBy         = '由誰創建';
+$lang->testcase->openedBy         = '由誰創建 ';
 $lang->testcase->openedDate       = '創建日期';
 $lang->testcase->lastEditedBy     = '最後修改者';
 $lang->testcase->result           = '測試結果';
@@ -70,7 +70,6 @@ $lang->testcase->exportTemplet      = "導出模板";
 $lang->testcase->export             = "導出數據";
 $lang->testcase->confirmChange      = '確認用例變動';
 $lang->testcase->confirmStoryChange = '確認需求變動';
-$lang->testcase->copy               = '複製用例';
 
 $lang->testcase->new = '新增';
 

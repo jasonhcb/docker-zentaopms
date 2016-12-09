@@ -509,20 +509,6 @@ class treeModel extends model
     }
 
     /**
-     * Get tree structure.
-     * 
-     * @param  int    $rootID 
-     * @param  string $type 
-     * @access public
-     * @return array
-     */
-    public function getTreeStructure($rootID, $type)
-    {
-        $stmt = $this->dbh->query($this->buildMenuQuery($rootID, $type, $startModule = 0));
-        return $this->getDataStructure($stmt, $type);
-    }
-
-    /**
      * Get project story tree menu.
      * 
      * @param  int    $rootID 
@@ -561,7 +547,7 @@ class treeModel extends model
             {
                 $treeMenu = array();
                 $query = $this->dao->select('*')->from(TABLE_MODULE)->where("(root = $id and type = 'story')")
-                    ->beginIF(count($branchGroups[$id]) > 1)->andWhere('branch')->eq($branch)->fi()
+                    ->andWhere('branch')->eq($branch)
                     ->beginIF($startModulePath)->andWhere('path')->like($startModulePath)->fi()
                     ->orderBy('grade desc, branch, type, `order`')
                     ->get();
@@ -700,6 +686,104 @@ class treeModel extends model
     }
 
     /**
+     * Get the tree menu of product document library.
+     * 
+     * @access public
+     * @return string
+     */
+    public function getProductDocTreeMenu()
+    {
+        $menu     = "<ul class='tree tree-lines'>";
+        $products = $this->loadModel('product')->getPairs('nocode');
+
+        $productModules = $this->getTreeMenu(0, 'productdoc', 0, array('treeModel', 'createDocLink'), 'product');
+        $startPos       = strpos($productModules, '<li');
+        $productModules = $startPos === false ? '' : substr($productModules, $startPos, strrpos($productModules, '</ul') - $startPos);
+        $projectModules = $this->getTreeMenu(0, 'projectdoc', 0, array('treeModel', 'createDocLink'), 'product');
+        $startPos       = strpos($projectModules, '<li');
+        $projectModules = $startPos === false ? '' : substr($projectModules, $startPos, strrpos($projectModules, '</ul>') - $startPos);
+
+        foreach($products as $productID =>$productName)
+        {
+            $menu .= '<li>';
+            $menu .= html::a(helper::createLink('doc', 'browse', "libID=product&module=0&productID=$productID"), $productName);
+            if(!empty($productModules) or !empty($projectModules))
+            {
+                $menu .= '<ul>';
+                $menu .= str_replace('%productID%', $productID, $productModules);
+
+                if(!empty($projectModules))
+                {
+                    $menu .= '<li>';
+                    $menu .= html::a(helper::createLink('doc', 'browse', "libID=product&module=0&productID=$productID&projectID=int"), $this->lang->tree->projectDoc);
+                    $menu .= '<ul>';
+                    $menu .= str_replace('%productID%', $productID, $projectModules);
+                    $menu .= '</ul></li>';
+                }
+                $menu .= '</ul>';
+            }
+            $menu .='</li>';
+        }
+        $menu .= '</ul>';
+        return $menu;
+    }
+
+    /**
+     * Get the tree menu of project document library.
+     * 
+     * @access public
+     * @return void
+     */
+    public function getProjectDocTreeMenu()
+    {
+        $menu     = "<ul class='tree tree-lines'>";
+        $products = $this->loadModel('product')->getPairs('nocode');
+        $projects = $this->loadModel('project')->getProductGroupList();
+
+        $projectModules = $this->getTreeMenu(0, 'projectdoc', 0, array('treeModel', 'createDocLink'), 'project');
+        $startPos       = strpos($projectModules, '<li');
+        $projectModules = $startPos === false ? '' : substr($projectModules, $startPos, strrpos($projectModules, '</ul') - $startPos);
+
+        foreach($projects as $id => $project)
+        {
+            if($id == '') 
+            {
+                $projects[0] = $projects[''];
+                unset($projects['']);
+            }
+        }
+
+        if(!empty($projects[0])) $products[0] = $this->lang->project->noProduct;
+
+        foreach($products as $productID => $productName)
+        {
+            $menu .= '<li>';
+            $menu .= $productName;
+
+            if(isset($projects[$productID]))
+            {
+                $menu .= '<ul>';
+                foreach($projects[$productID] as $project)
+                {
+                    $menu .= '<li>' . html::a(helper::createLink('doc', 'browse', "libID=project&module=0&productID=0&projectID=$project->id"), $project->name);
+                    if(!empty($projectModules))
+                    {
+                        $menu .= '<ul>';
+                        $menu .= str_replace('%projectID%', $project->id, $projectModules);
+                        $menu .= '</ul>';
+                    }
+                    $menu .= '</li>';
+                }
+                $menu .='</ul>';
+            }
+            $menu .='</li>';
+        }
+
+        $menu .= '</ul>';
+        return $menu;
+    }
+
+    /**
      * Create link of a story.
      * 
      * @param  object   $module 
@@ -753,8 +837,20 @@ class treeModel extends model
      */
     public function createDocLink($type, $module, $extra = '')
     {
-        $libID    = $module->root;
-        $linkHtml = html::a(helper::createLink('doc', 'browse', "libID={$libID}&browseType=byModule&param={$module->id}"), $module->name, '_self', "id='module{$module->id}'");
+        $libID  = $module->root;
+        $append = '';
+        if($extra == 'product')
+        {
+            $libID  = 'product';
+            $append = '&productID=%productID%';
+        }
+        elseif($extra == 'project')
+        {
+            $libID  = 'project';
+            $append = '&productID=0&projectID=%projectID%';
+        }
+
+        $linkHtml = html::a(helper::createLink('doc', 'browse', "libID={$libID}&module={$module->id}{$append}"), $module->name, '_self', "id='module{$module->id}'");
         return $linkHtml;
     }
 
@@ -1099,7 +1195,7 @@ class treeModel extends model
         $parentModule = $this->getByID($parentModuleID);
 
         $data     = fixer::input('post')->get();
-        $branches = isset($data->branch) ? $data->branch : array();
+        $branches = $data->branch;
         $shorts   = $data->shorts;
         if($parentModule)
         {
@@ -1121,9 +1217,9 @@ class treeModel extends model
             {
                 $module          = new stdClass();
                 $module->root    = $rootID;
-                $module->name    = strip_tags(trim($moduleName));
+                $module->name    = strip_tags($moduleName);
                 $module->parent  = $parentModuleID;
-                $module->branch  = isset($branches[$moduleID]) ? $branches[$moduleID] : 0;
+                $module->branch  = $branches[$moduleID];
                 $module->short   = $shorts[$moduleID];
                 $module->grade   = $grade;
                 $module->type    = $type;
@@ -1138,7 +1234,7 @@ class treeModel extends model
             {
                 $short    = $shorts[$moduleID];
                 $moduleID = str_replace('id', '', $moduleID);
-                $this->dao->update(TABLE_MODULE)->set('name')->eq(strip_tags(trim($moduleName)))->set('short')->eq($short)->where('id')->eq($moduleID)->limit(1)->exec();
+                $this->dao->update(TABLE_MODULE)->set('name')->eq(strip_tags($moduleName))->set('short')->eq($short)->where('id')->eq($moduleID)->limit(1)->exec();
             }
         }
     }
@@ -1157,7 +1253,6 @@ class treeModel extends model
         $this->checkUnique($self->root, $self->type, $self->parent, array("id{$self->id}" => $module->name), array("id{$self->id}" => $self->branch));
         $parent = $this->getById($this->post->parent);
         $childs = $this->getAllChildId($moduleID);
-        $module->name  = strip_tags(trim($module->name));
         $module->grade = $parent ? $parent->grade + 1 : 1;
         $module->path  = $parent ? $parent->path . $moduleID . ',' : ',' . $moduleID . ',';
         $this->dao->update(TABLE_MODULE)->data($module)->autoCheck()->check('name', 'notempty')->where('id')->eq($moduleID)->exec();

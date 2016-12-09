@@ -54,13 +54,15 @@ class cronModel extends model
         {
             $row = "{$cron->m} {$cron->h} {$cron->dom} {$cron->mon} {$cron->dow} {$cron->command}";
             preg_match_all('/(\S+\s+){5}|.*/', $row, $matchs);
+            // preg_match_all('/(\S+\s+){4}(\S+)|.*/', $row, $matchs);
             if($matchs[0])
             {
                 try
                 {
                     $parsedCron = array();
                     $parsedCron['schema']   = trim($matchs[0][0]);
-                    $parsedCron['command']  = trim($matchs[0][1]);
+                    // $parsedCron['command']  = trim($matchs[0][1]);
+                    $parsedCron['command']  = $cron->command;
                     $parsedCron['cron']     = CronExpression::factory($parsedCron['schema']);
                     $parsedCron['time']     = $parsedCron['cron']->getNextRunDate();
                     $parsedCrons[$cron->id] = $parsedCron;
@@ -121,8 +123,7 @@ class cronModel extends model
      */
     public function getLastTime()
     {
-        $cron = $this->dao->select('*')->from(TABLE_CRON)->orderBy('lastTime desc')->limit(1)->fetch();
-        return isset($cron->lastTime) ? $cron->lastTime : $cron->lasttime;
+        return $this->dao->select('*')->from(TABLE_CRON)->orderBy('lastTime desc')->limit(1)->fetch('lastTime');
     }
 
     /**

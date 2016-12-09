@@ -21,7 +21,7 @@
         echo $moduleName;
         if($moduleID)
         {
-            $removeLink = $browseType == 'bymodule' ? inlink('browse', "productID=$productID&branch=$branch&browseType=$browseType&param=0&orderBy=$orderBy&recTotal=0&recPerPage={$pager->recPerPage}") : 'javascript:removeCookieByKey("storyModule")';
+            $removeLink = $browseType == 'bymodule' ? inlink('browse', "productID=$productID&branch=$branch&browseType=$browseType&param=0&orderBy=$orderBy&recTotal={$pager->recTotal}&recPerPage={$pager->recPerPage}") : 'javascript:removeCookieByKey("storyModule")';
             echo html::a($removeLink, "<i class='icon icon-remove'></i>", '', "class='text-muted'");
         }
         ?>
@@ -61,7 +61,7 @@
     if(commonModel::isTutorialMode())
     {
         $wizardParams = helper::safe64Encode("productID=$productID&branch=$branch&moduleID=$moduleID");
-        echo html::a($this->createLink('tutorial', 'wizard', "module=story&method=create&params=$wizardParams"), "<i class='icon-plus'></i> {$lang->story->create}",'', "class='btn create-story-btn'");
+        common::printIcon('tutorial', 'wizard', "module=story&method=create&params=$wizardParams", 'btn', 'button', 'plus', '', 'create-story-btn', false, '', $lang->story->create);
     }
     else
     {
@@ -100,7 +100,7 @@
         <td colspan='11'>
           <div class='table-actions clearfix'>
             <?php if(count($stories)):?>
-            <?php echo html::selectButton();?>
+            <?php if(!$useDatatable) echo html::selectButton();?>
             <?php
             $canBatchEdit  = common::hasPriv('story', 'batchEdit');
             $disabled   = $canBatchEdit ? '' : "disabled='disabled'";
@@ -237,11 +237,11 @@
                       $actionLink = $this->createLink('story', 'batchAssignTo', "productID=$productID");
                       echo html::select('assignedTo', $users, '', 'class="hidden"');
                       echo "<li class='dropdown-submenu'>";
-                      echo html::a('javascript::', $lang->story->assignedTo, '', 'id="assignItem"');
+                      echo html::a('javascript::', $lang->story->assignedTo, 'id="assignItem"');
                       echo "<ul class='dropdown-menu" . ($withSearch ? ' with-search':'') . "'>";
                       foreach ($users as $key => $value)
                       {
-                          if(empty($key) or $key == 'closed') continue;
+                          if(empty($key)) continue;
                           echo "<li class='option' data-key='$key'>" . html::a("javascript:$(\".table-actions #assignedTo\").val(\"$key\");setFormAction(\"$actionLink\")", $value, '', '') . '</li>';
                       }
                       if($withSearch) echo "<li class='menu-search'><div class='input-group input-group-sm'><input type='text' class='form-control' placeholder=''><span class='input-group-addon'><i class='icon-search'></i></span></div></li>";
@@ -277,7 +277,7 @@ if($shortcut.size() > 0)
     $('#querybox').removeClass('show');
 }
 <?php endif;?>
-<?php if(isset($this->config->product->homepage) and $this->config->product->homepage != 'browse'):?>
+<?php if($this->config->product->homepage != 'browse'):?>
 $('#modulemenu .nav li.right:last').after("<li class='right'><a style='font-size:12px' href='javascript:setHomepage(\"product\", \"browse\")'><i class='icon icon-cog'></i><?php echo $lang->homepage?></a></li>")
 <?php endif;?>
 </script>
