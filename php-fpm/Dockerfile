@@ -2,7 +2,7 @@ FROM php:5.6-fpm
 MAINTAINER  <chubo.he@hand-china.com>
 #安装依赖包
 RUN apt-get update
-RUN apt-get install -y zip libaio-dev php5-dev
+RUN apt-get install -y zip libaio-dev php5-dev ruby
 #设置ORACLE环境变量
 ENV OCI_INSTANT_PATH /usr/lib/instantclient_12_1
 #安装ORACLE
